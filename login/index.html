@@ -1,0 +1,368 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول · صندوق التكافل العائلي</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-100);
+            padding: 1.5rem;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-card {
+            background: #fff;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: var(--primary);
+            padding: 2.25rem 2rem;
+            text-align: center;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .login-header::before {
+                content: '';
+                position: absolute;
+                top: -50px;
+                right: -50px;
+                width: 160px;
+                height: 160px;
+                border-radius: 50%;
+                background: rgba(255,255,255,.05);
+            }
+
+            .login-header .logo-wrap {
+                width: 68px;
+                height: 68px;
+                background: rgba(255,255,255,.15);
+                border: 2px solid rgba(255,255,255,.25);
+                border-radius: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 30px;
+                margin: 0 auto 1rem;
+                position: relative;
+            }
+
+            .login-header h1 {
+                font-size: 20px;
+                font-weight: 700;
+                margin: 0 0 5px;
+            }
+
+            .login-header p {
+                font-size: 13px;
+                opacity: .8;
+                margin: 0;
+            }
+
+        .demo-btns {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 14px;
+        }
+
+        .demo-btn {
+            padding: 4px 14px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,.3);
+            background: rgba(255,255,255,.12);
+            color: #fff;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: background .15s;
+        }
+
+            .demo-btn:hover {
+                background: rgba(255,255,255,.25);
+            }
+
+        .login-body {
+            padding: 2rem;
+        }
+
+        .field-wrap {
+            position: relative;
+        }
+
+        .field-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            pointer-events: none;
+            opacity: .5;
+        }
+
+        .field-wrap input {
+            padding-left: 38px;
+        }
+
+        .toggle-pass {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            cursor: pointer;
+            opacity: .5;
+            transition: opacity .15s;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+            .toggle-pass:hover {
+                opacity: 1;
+            }
+
+        .remember-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            font-size: 13px;
+        }
+
+            .remember-row label {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                cursor: pointer;
+                color: var(--gray-600);
+            }
+
+            .remember-row input[type=checkbox] {
+                accent-color: var(--primary);
+            }
+
+        .forgot-link {
+            color: var(--info);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+            .forgot-link:hover {
+                text-decoration: underline;
+            }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 700;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: background .15s, transform .1s;
+        }
+
+            .btn-login:hover {
+                background: var(--primary-hover);
+            }
+
+            .btn-login:active {
+                transform: scale(.98);
+            }
+
+            .btn-login:disabled {
+                background: var(--gray-400);
+                cursor: not-allowed;
+            }
+
+        .login-footer {
+            text-align: center;
+            font-size: 12px;
+            color: var(--gray-400);
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .error-alert {
+            background: var(--danger-light);
+            border: 1px solid var(--danger-border);
+            border-radius: var(--radius-md);
+            color: var(--danger-dark);
+            padding: 11px 14px;
+            font-size: 13px;
+            margin-bottom: 1.1rem;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .error-alert.show {
+                display: flex;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="login-card">
+
+            <div class="login-header">
+                <!--<div class="logo-wrap">🤝</div>-->
+                <h1>صندوق التكافل العائلي</h1>
+                <!--<p>نظام إدارة المساعدات والاشتراكات</p>-->
+                <div class="demo-btns">
+                    <button class="demo-btn" onclick="fillDemo('admin')">تجربة كأدمن</button>
+                    <button class="demo-btn" onclick="fillDemo('member')">تجربة كعضو</button>
+                </div>
+            </div>
+
+            <div class="login-body">
+
+                <div class="error-alert" id="errorAlert">
+                    <span>✗</span>
+                    <span id="errorMsg">البريد الإلكتروني أو كلمة المرور غير صحيحة</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="emailInput">البريد الإلكتروني <span class="req">*</span></label>
+                    <div class="field-wrap">
+                        <span class="field-icon">✉</span>
+                        <input type="email"
+                               id="emailInput"
+                               class="form-control-custom"
+                               placeholder="example@family-fund.jo"
+                               autocomplete="email"
+                               style="padding-left:38px;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="passInput">كلمة المرور <span class="req">*</span></label>
+                    <div class="field-wrap">
+                        <span class="field-icon">🔒</span>
+                        <input type="password"
+                               id="passInput"
+                               class="form-control-custom"
+                               placeholder="أدخل كلمة المرور"
+                               autocomplete="current-password"
+                               style="padding-left:38px;padding-right:38px;">
+                        <button class="toggle-pass" type="button" onclick="togglePassword()" id="toggleBtn">👁</button>
+                    </div>
+                </div>
+
+                <div class="remember-row">
+                    <label><input type="checkbox" id="rememberMe"> تذكرني لمدة 30 يوماً</label>
+                    <a href="forgot-password.html" class="forgot-link">نسيت كلمة المرور؟</a>
+                </div>
+
+                <button class="btn-login" id="loginBtn" onclick="doLogin()">
+                    تسجيل الدخول
+                </button>
+
+                <!--<div class="login-footer">
+                    🔐 بيانات مشفرة بـ JWT · نظام آمن 100%
+                </div>-->
+            </div>
+        </div>
+    </div>
+
+    <script src="main.css"></script>
+    <script>
+        /* If already logged in, redirect */
+        if (Auth.isLoggedIn()) {
+            window.location.href = Auth.isAdmin() ? 'index.html' : 'member-dashboard.html';
+        }
+
+        function fillDemo(role) {
+            document.getElementById('errorAlert').classList.remove('show');
+            if (role === 'admin') {
+                document.getElementById('emailInput').value = 'admin@family-fund.jo';
+                document.getElementById('passInput').value = 'Admin@2024!';
+            } else {
+                document.getElementById('emailInput').value = 'ahmed@family-fund.jo';
+                document.getElementById('passInput').value = 'Member@2024!';
+            }
+        }
+
+        function togglePassword() {
+            const inp = document.getElementById('passInput');
+            const btn = document.getElementById('toggleBtn');
+            if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+            else { inp.type = 'password'; btn.textContent = '👁'; }
+        }
+
+        async function doLogin() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passInput').value;
+            const btn = document.getElementById('loginBtn');
+            const errAlert = document.getElementById('errorAlert');
+            const errMsg = document.getElementById('errorMsg');
+
+            errAlert.classList.remove('show');
+
+            /* Basic validation */
+            if (!email) {
+                errMsg.textContent = 'يرجى إدخال البريد الإلكتروني';
+                errAlert.classList.add('show'); return;
+            }
+            if (!password) {
+                errMsg.textContent = 'يرجى إدخال كلمة المرور';
+                errAlert.classList.add('show'); return;
+            }
+
+            UI.btnLoading(btn, true);
+
+            try {
+                /* ── Real API call ──
+                   const data = await API.login(email, password);
+                   Auth.save(data.token, data.user);
+                   window.location.href = data.user.role === 'Admin'
+                     ? 'index.html'
+                     : 'member-dashboard.html';
+                */
+
+                /* ── Demo simulation ── */
+                await new Promise(r => setTimeout(r, 900));
+                if (email.includes('admin')) {
+                    Auth.save('demo-jwt-admin-token', { id: 1, fullName: 'عبدالله المدير', email, role: 'Admin', familyId: 'FAM-001' });
+                    window.location.href = 'index.html';
+                } else {
+                    Auth.save('demo-jwt-member-token', { id: 4, fullName: 'أحمد محمد', email, role: 'Member', familyId: 'FAM-001' });
+                    window.location.href = 'member-dashboard.html';
+                }
+
+            } catch (err) {
+                errMsg.textContent = err.message || 'حدث خطأ، يرجى المحاولة مجدداً';
+                errAlert.classList.add('show');
+                UI.btnLoading(btn, false, 'تسجيل الدخول');
+            }
+        }
+
+        /* Enter key support */
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter') doLogin();
+        });
+    </script>
+</body>
+</html>
