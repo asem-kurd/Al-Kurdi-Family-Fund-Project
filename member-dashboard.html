@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة العضو · صندوق التكافل العائلي</title>
+  <link rel="stylesheet" href="assets/shared.css">
+  <style>
+    .main-content{flex:1;min-width:0;padding:1.5rem;max-width:1100px;margin:0 auto;}
+    .balance-card{background:linear-gradient(135deg,var(--primary) 0%,#1e5f8e 60%,#2176ae 100%);border-radius:var(--radius-lg);padding:2rem;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem;margin-bottom:1.5rem;box-shadow:var(--shadow-md);position:relative;overflow:hidden;}
+    .balance-card::before{content:'';position:absolute;top:-60px;left:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.05);}
+    .bc-info .lbl{font-size:13px;opacity:.8;margin-bottom:5px;}
+    .bc-info .amt{font-size:42px;font-weight:700;line-height:1;}
+    .bc-info .cur{font-size:20px;opacity:.75;}
+    .bc-stats{display:flex;gap:2rem;flex-wrap:wrap;}
+    .bc-stat{text-align:center;}
+    .bc-stat .lbl{font-size:12px;opacity:.75;margin-bottom:4px;}
+    .bc-stat .val{font-size:20px;font-weight:700;}
+    .payment-status-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:1.5rem;box-shadow:var(--shadow-sm);}
+    .ps-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+    .ps-header h3{font-size:15px;font-weight:700;color:var(--gray-800);margin:0;display:flex;align-items:center;gap:7px;}
+    .tx-list-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);}
+    .tx-list-item:last-child{border-bottom:none;}
+    .tx-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .tx-dep{background:var(--success-light);}
+    .tx-wd{background:var(--danger-light);}
+    .tx-info{flex:1;min-width:0;}
+    .tx-info .tx-t{font-size:14px;font-weight:500;color:var(--gray-800);}
+    .tx-info .tx-d{font-size:12px;color:var(--gray-400);margin-top:2px;}
+    .tx-amt{font-size:15px;font-weight:700;}
+    .tx-plus{color:var(--success);}
+    .tx-minus{color:var(--danger);}
+    .next-meeting-card{background:#fff;border:1px solid var(--primary);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:1.5rem;box-shadow:var(--shadow-sm);border-right:4px solid var(--primary);}
+    .nm-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+    .nm-header h3{font-size:15px;font-weight:700;color:var(--primary);margin:0;display:flex;align-items:center;gap:7px;}
+    .nm-details{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+    .nm-item{background:var(--gray-50);border-radius:var(--radius-sm);padding:10px 12px;}
+    .nm-item .lbl{font-size:11px;color:var(--gray-400);font-weight:600;}
+    .nm-item .val{font-size:14px;font-weight:600;color:var(--gray-800);}
+    .grid-2{display:grid;grid-template-columns:1fr;gap:1.5rem;margin-bottom:1.5rem;}
+    @media(min-width:768px){.grid-2{grid-template-columns:1fr 1fr;}}
+    .member-avatar-lg{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;border:3px solid rgba(255,255,255,.3);}
+    .profile-strip{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;}
+    .profile-strip .name{font-size:18px;font-weight:700;color:var(--gray-800);}
+    .profile-strip .meta{font-size:13px;color:var(--gray-500);}
+
+    @media(max-width:480px){
+      .bc-info .amt{font-size:28px;}
+      .bc-stats{gap:1rem;}
+      .bc-stat .val{font-size:16px;}
+      .nm-details{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<nav class="app-navbar">
+  <button class="nav-toggle" onclick="MobileNav.toggleNav()" aria-label="القائمة">☰</button>
+  <a href="member-dashboard.html" class="navbar-brand">
+    <div class="brand-icon">🤝</div>
+    <span>صندوق التكافل</span>
+    <span class="role-badge role-member">عضو</span>
+  </a>
+  <div class="nav-links">
+    <a href="member-dashboard.html" class="nav-link active">🏠 الرئيسية</a>
+    <a href="#" class="nav-link" onclick="showModal('paymentHistoryModal');return false;">💰 مدفوعاتي</a>
+  </div>
+  <div class="navbar-right">
+    <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+    <a href="profile.html" class="user-avatar" style="text-decoration:none;">أم</a>
+  </div>
+</nav>
+
+<div class="main-content">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>أهلاً، أحمد 👋</h1>
+      <p id="todayDate">الأحد، 4 مايو 2026</p>
+    </div>
+    <div>
+      <button class="btn-outline-custom" onclick="showModal('paymentHistoryModal')">📋 سجل مدفوعاتي</button>
+    </div>
+  </div>
+
+  <div class="profile-strip">
+    <div class="member-avatar-lg" style="background:#E6F1FB;color:#185FA5;">أم</div>
+    <div>
+      <div class="name">أحمد محمد</div>
+      <div class="meta">عضو منذ يناير 2025 · #MBR-0001</div>
+    </div>
+  </div>
+
+  <div class="balance-card">
+    <div class="bc-info">
+      <div class="lbl">💰 إجمالي مساهماتي</div>
+      <div><span class="amt">48</span> <span class="cur">د.أ</span></div>
+      <div style="font-size:12px;opacity:.7;margin-top:4px;">16 شهر × 3 د.أ</div>
+    </div>
+    <div class="bc-stats">
+      <div class="bc-stat">
+        <div class="lbl">الأشهر المدفوعة</div>
+        <div class="val">16</div>
+      </div>
+      <div class="bc-stat">
+        <div class="lbl">حالة مايو</div>
+        <div class="val" style="color:#4ade80;">✅ مدفوع</div>
+      </div>
+      <div class="bc-stat">
+        <div class="lbl">الالتزام</div>
+        <div class="val">100%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-icon">💳</span>
+      <div class="stat-label">رصيد الصندوق</div>
+      <div class="stat-value" style="color:var(--primary);">2,847</div>
+      <div class="stat-sub">دينار أردني</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">👥</span>
+      <div class="stat-label">الأعضاء النشطون</div>
+      <div class="stat-value" style="color:var(--success);">12</div>
+      <div class="stat-sub">عضو</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">📊</span>
+      <div class="stat-label">نسبة التحصيل</div>
+      <div class="stat-value" style="color:var(--warning);">75%</div>
+      <div class="stat-sub">مايو 2026</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">📅</span>
+      <div class="stat-label">الاجتماع القادم</div>
+      <div class="stat-value" style="color:var(--info);">1</div>
+      <div class="stat-sub">يوم</div>
+    </div>
+  </div>
+
+  <div class="next-meeting-card">
+    <div class="nm-header">
+      <h3>📅 الاجتماع القادم</h3>
+      <span class="badge-info">الثلاثاء 5 مايو</span>
+    </div>
+    <div class="nm-details">
+      <div class="nm-item"><div class="lbl">الموعد</div><div class="val">8:00 مساءً</div></div>
+      <div class="nm-item"><div class="lbl">المضيف</div><div class="val">خالد حسن</div></div>
+      <div class="nm-item"><div class="lbl">المكان</div><div class="val">منزل الأخ خالد</div></div>
+      <div class="nm-item"><div class="lbl">الموضوع</div><div class="val">مراجعة مالية Q2</div></div>
+    </div>
+  </div>
+
+  <div class="payment-status-card">
+    <div class="ps-header">
+      <h3>📅 حالة المدفوعات (16 شهر)</h3>
+      <span class="badge-paid">100% التزام</span>
+    </div>
+    <div class="months-grid" id="monthsGrid"></div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--success-light);border:1px solid var(--success-border);"></span> مدفوع</span>
+      <span><span class="dot" style="background:var(--primary);"></span> الشهر الحالي</span>
+      <span><span class="dot" style="background:var(--warning-light);border:1px solid var(--warning-border);"></span> قيد الانتظار</span>
+      <span><span class="dot" style="background:var(--gray-100);border:1px solid var(--gray-200);"></span> مستقبل</span>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header">
+        <h2><span class="ph-icon">💳</span> آخر مدفوعاتي</h2>
+      </div>
+      <div class="panel-body" id="myPayments"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2><span class="ph-icon">📢</span> آخر الأخبار</h2>
+      </div>
+      <div class="panel-body">
+        <div class="tx-list-item">
+          <div class="tx-icon tx-dep">🚨</div>
+          <div class="tx-info">
+            <div class="tx-t">طلب سحب معلق</div>
+            <div class="tx-d">محمد رشيد يطلب 200 د.أ - بانتظار الموافقة</div>
+          </div>
+        </div>
+        <div class="tx-list-item">
+          <div class="tx-icon tx-dep">📅</div>
+          <div class="tx-info">
+            <div class="tx-t">اجتماع غداً</div>
+            <div class="tx-d">لا تنسَ اجتماع الثلاثاء الساعة 8 مساءً</div>
+          </div>
+        </div>
+        <div class="tx-list-item">
+          <div class="tx-icon tx-dep">✅</div>
+          <div class="tx-info">
+            <div class="tx-t">تمت الموافقة على السحب</div>
+            <div class="tx-d">مساعدة عائلة الحسن - 150 د.أ</div>
+          </div>
+        </div>
+        <div class="tx-list-item">
+          <div class="tx-icon tx-dep">💳</div>
+          <div class="tx-info">
+            <div class="tx-t">تم تسجيل دفعتك</div>
+            <div class="tx-d">اشتراك مايو 2026 - 3 د.أ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="paymentHistoryModal" onclick="closeModalOutside(event,'paymentHistoryModal')">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-header">
+      <h3>💳 سجل المدفوعات</h3>
+      <button class="modal-close" onclick="hideModal('paymentHistoryModal')">✕</button>
+    </div>
+    <div class="modal-body" id="fullPaymentHistory"></div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="hideModal('paymentHistoryModal')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/shared.js"></script>
+<script>
+const MONTH_NAMES = ['يناير 2025','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر','يناير 2026','فبراير','مارس','أبريل','مايو','يونيو','يوليو'];
+
+function renderMonthsGrid() {
+  const paid = 16;
+  const current = 'مايو 2026';
+  const container = document.getElementById('monthsGrid');
+  container.innerHTML = MONTH_NAMES.map((m, i) => {
+    let cls = 'mm-future';
+    if(i < paid) cls = 'mm-paid';
+    else if(i === paid) cls = 'mm-current';
+    return `<div class="month-cell ${cls}" title="${m}">${m.split(' ')[0]}</div>`;
+  }).join('');
+}
+
+function renderMyPayments() {
+  const payments = [
+    { desc:'اشتراك مايو 2026', amount:3, date:'1 مايو 2026' },
+    { desc:'اشتراك أبريل 2026', amount:3, date:'1 أبريل 2026' },
+    { desc:'اشتراك مارس 2026', amount:3, date:'1 مارس 2026' },
+    { desc:'اشتراك فبراير 2026', amount:3, date:'1 فبراير 2026' },
+    { desc:'اشتراك يناير 2026', amount:3, date:'1 يناير 2026' },
+    { desc:'اشتراك ديسمبر 2025', amount:3, date:'1 ديسمبر 2025' },
+  ];
+  document.getElementById('myPayments').innerHTML = payments.map(p => `
+    <div class="tx-list-item">
+      <div class="tx-icon tx-dep">💳</div>
+      <div class="tx-info">
+        <div class="tx-t">${p.desc}</div>
+        <div class="tx-d">${p.date}</div>
+      </div>
+      <div class="tx-amt tx-plus">+${p.amount.toFixed(2)} د.أ</div>
+    </div>`).join('');
+
+  document.getElementById('fullPaymentHistory').innerHTML = payments.map(p => `
+    <div class="tx-list-item">
+      <div class="tx-icon tx-dep">💳</div>
+      <div class="tx-info">
+        <div class="tx-t">${p.desc}</div>
+        <div class="tx-d">${p.date}</div>
+      </div>
+      <div class="tx-amt tx-plus">+${p.amount.toFixed(2)} د.أ</div>
+    </div>`).join('');
+}
+
+function setDate() {
+  const d = new Date();
+  const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  document.getElementById('todayDate').textContent = `${days[d.getDay()]}، ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function showModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function hideModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+function closeModalOutside(e,id){ if(e.target.id===id) hideModal(id); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  setDate();
+  renderMonthsGrid();
+  renderMyPayments();
+});
+</script>
+</body>
+</html>

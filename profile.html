@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الملف الشخصي · صندوق التكافل العائلي</title>
+  <link rel="stylesheet" href="assets/shared.css">
+  <style>
+    .page-wrap{max-width:900px;margin:0 auto;padding:1.5rem;}
+    .profile-header{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:2rem;box-shadow:var(--shadow-sm);margin-bottom:1.5rem;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+    .ph-avatar{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;flex-shrink:0;}
+    .ph-info h1{font-size:22px;font-weight:700;color:var(--gray-800);margin:0 0 4px;}
+    .ph-info .role{font-size:13px;color:var(--gray-500);}
+    .ph-info .role .badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;margin-right:8px;}
+    .badge-admin{background:var(--accent);color:#fff;}
+    .badge-member{background:var(--success);color:#fff;}
+    .settings-grid{display:grid;grid-template-columns:1fr;gap:1.5rem;}
+    @media(min-width:768px){.settings-grid{grid-template-columns:1fr 1fr;}}
+    .settings-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;}
+    .sc-header{padding:14px 18px;border-bottom:1px solid var(--gray-200);}
+    .sc-header h2{font-size:15px;font-weight:700;color:var(--gray-800);margin:0;display:flex;align-items:center;gap:7px;}
+    .sc-body{padding:18px;}
+    .info-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-100);flex-wrap:wrap;gap:4px;}
+    .info-row:last-child{border-bottom:none;}
+    .info-row .lbl{font-size:13px;color:var(--gray-500);font-weight:500;}
+    .info-row .val{font-size:14px;font-weight:600;color:var(--gray-800);}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gray-100);gap:12px;}
+    .toggle-row:last-child{border-bottom:none;}
+    .toggle-info .t-title{font-size:14px;font-weight:500;color:var(--gray-800);}
+    .toggle-info .t-desc{font-size:12px;color:var(--gray-400);margin-top:2px;}
+    .toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0;}
+    .toggle-switch input{opacity:0;width:0;height:0;}
+    .toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--gray-300);border-radius:24px;transition:.2s;}
+    .toggle-slider:before{content:'';position:absolute;height:18px;width:18px;right:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+    .toggle-switch input:checked+.toggle-slider{background:var(--success);}
+    .toggle-switch input:checked+.toggle-slider:before{transform:translateX(-20px);}
+    .danger-zone{border-color:var(--danger-border);}
+    .danger-zone .sc-header{background:var(--danger-light);}
+    .danger-zone .sc-header h2{color:var(--danger);}
+    .password-req{font-size:11px;color:var(--gray-400);margin-top:4px;display:flex;align-items:center;gap:4px;}
+    .password-req.met{color:var(--success);}
+    .password-req .icon{font-size:12px;}
+  </style>
+</head>
+<body>
+
+<nav class="app-navbar">
+  <button class="nav-toggle" onclick="MobileNav.toggleSidebar()" aria-label="القائمة">☰</button>
+  <a href="admin-dashboard.html" class="navbar-brand">
+    <div class="brand-icon">🤝</div>
+    <span>صندوق التكافل</span>
+    <span class="role-badge role-admin">أدمن</span>
+  </a>
+  <div class="nav-links">
+    <a href="admin-dashboard.html" class="nav-link">🏠 الرئيسية</a>
+    <a href="members.html"         class="nav-link">👥 الأعضاء</a>
+    <a href="transactions.html"    class="nav-link">💰 المعاملات</a>
+    <a href="withdrawals.html"     class="nav-link">🚨 السحوبات</a>
+    <a href="meetings.html"        class="nav-link">📅 الاجتماعات</a>
+  </div>
+  <div class="navbar-right">
+    <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+    <div class="user-avatar">عم</div>
+  </div>
+</nav>
+
+<div class="sidebar-overlay"></div>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="brand">🤝 صندوق التكافل</span>
+      <button class="sidebar-close" onclick="MobileNav.closeSidebar()">✕</button>
+    </div>
+    <div class="sidebar-section-title">القائمة الرئيسية</div>
+    <a href="admin-dashboard.html" class="sidebar-link"><span class="s-icon">🏠</span> الرئيسية</a>
+    <a href="members.html"         class="sidebar-link"><span class="s-icon">👥</span> إدارة الأعضاء</a>
+    <a href="transactions.html"    class="sidebar-link"><span class="s-icon">💰</span> المعاملات</a>
+    <a href="withdrawals.html"     class="sidebar-link"><span class="s-icon">🚨</span> طلبات السحب</a>
+    <a href="meetings.html"        class="sidebar-link"><span class="s-icon">📅</span> الاجتماعات</a>
+    <div class="sidebar-section-title">الحساب</div>
+    <a href="profile.html" class="sidebar-link active"><span class="s-icon">👤</span> الملف الشخصي</a>
+    <a href="#" class="sidebar-link" onclick="showModal('changePasswordModal');return false;"><span class="s-icon">🔒</span> الأمان</a>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="u-avatar">عم</div>
+        <div><div class="u-name">عبدالله المدير</div><div class="u-role">مدير النظام</div></div>
+      </div>
+      <button class="btn-logout" onclick="Auth.logout()">🚪 تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-wrap" style="max-width:none;padding:0;">
+      <a href="admin-dashboard.html" class="back-link">→ العودة للرئيسية</a>
+
+      <div class="profile-header">
+        <div class="ph-avatar" style="background:var(--accent);color:#fff;">عم</div>
+        <div class="ph-info">
+          <h1>عبدالله المدير</h1>
+          <div class="role">
+            <span class="badge badge-admin">أدمن</span>
+            عضو منذ يناير 2025 · #ADM-001
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <div class="settings-card">
+          <div class="sc-header"><h2>👤 المعلومات الشخصية</h2></div>
+          <div class="sc-body">
+            <div class="info-row"><span class="lbl">الاسم الكامل</span><span class="val">عبدالله المدير</span></div>
+            <div class="info-row"><span class="lbl">البريد الإلكتروني</span><span class="val">admin@family-fund.jo</span></div>
+            <div class="info-row"><span class="lbl">رقم الهاتف</span><span class="val">079-0000-001</span></div>
+            <div class="info-row"><span class="lbl">الدور</span><span class="val">مدير النظام</span></div>
+            <div class="info-row"><span class="lbl">تاريخ الانضمام</span><span class="val">يناير 2025</span></div>
+            <button class="btn-primary-custom" style="width:100%;justify-content:center;margin-top:14px;" onclick="showModal('editProfileModal')">✏️ تعديل المعلومات</button>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="sc-header"><h2>🔒 الأمان</h2></div>
+          <div class="sc-body">
+            <div class="info-row"><span class="lbl">كلمة المرور</span><span class="val">••••••••</span></div>
+            <div class="info-row"><span class="lbl">آخر تسجيل دخول</span><span class="val">اليوم 10:30 ص</span></div>
+            <div class="info-row"><span class="lbl">الجهاز</span><span class="val">Chrome · Windows</span></div>
+            <button class="btn-outline-custom" style="width:100%;justify-content:center;margin-top:14px;" onclick="showModal('changePasswordModal')">🔑 تغيير كلمة المرور</button>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="sc-header"><h2>🔔 الإشعارات</h2></div>
+          <div class="sc-body">
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="t-title">إشعارات الدفع</div><div class="t-desc">عند تسجيل عضو جديد لدفعته</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="t-title">طلبات السحب</div><div class="t-desc">عند تقديم طلب سحب جديد</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="t-title">تذكير الاجتماعات</div><div class="t-desc">قبل يوم من الاجتماع</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="t-title">تقارير شهرية</div><div class="t-desc">ملخص مالي شهري</div></div>
+              <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+            </div>
+            <button class="btn-primary-custom" style="width:100%;justify-content:center;margin-top:14px;" onclick="saveNotifications()">✓ حفظ الإعدادات</button>
+          </div>
+        </div>
+
+        <div class="settings-card danger-zone">
+          <div class="sc-header"><h2>⚠️ منطقة الخطر</h2></div>
+          <div class="sc-body">
+            <div style="padding:12px 0;border-bottom:1px solid var(--gray-100);">
+              <div style="font-size:14px;font-weight:500;color:var(--gray-800);">تسجيل الخروج من جميع الأجهزة</div>
+              <div style="font-size:12px;color:var(--gray-400);margin-top:3px;margin-bottom:10px;">سيتم تسجيل خروجك من جميع الأجهزة الأخرى</div>
+              <button class="btn-outline-custom btn-sm-custom" onclick="logoutAll()">🚪 تسجيل الخروج</button>
+            </div>
+            <div style="padding:12px 0;">
+              <div style="font-size:14px;font-weight:500;color:var(--danger);">حذف الحساب</div>
+              <div style="font-size:12px;color:var(--gray-400);margin-top:3px;margin-bottom:10px;">سيتم حذف حسابك نهائياً</div>
+              <button class="btn-danger-custom btn-sm-custom" onclick="deleteAccount()">🗑️ حذف الحساب</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="editProfileModal" onclick="closeModalOutside(event,'editProfileModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>✏️ تعديل المعلومات</h3>
+      <button class="modal-close" onclick="hideModal('editProfileModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">الاسم الكامل <span class="req">*</span></label>
+        <input type="text" id="edit_name" class="form-control-custom" value="عبدالله المدير">
+      </div>
+      <div class="form-group">
+        <label class="form-label">البريد الإلكتروني <span class="req">*</span></label>
+        <input type="email" id="edit_email" class="form-control-custom" value="admin@family-fund.jo">
+      </div>
+      <div class="form-group">
+        <label class="form-label">رقم الهاتف</label>
+        <input type="tel" id="edit_phone" class="form-control-custom" value="079-0000-001">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="hideModal('editProfileModal')">إلغاء</button>
+      <button class="btn-primary-custom" onclick="saveProfile()">✓ حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="changePasswordModal" onclick="closeModalOutside(event,'changePasswordModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>🔑 تغيير كلمة المرور</h3>
+      <button class="modal-close" onclick="hideModal('changePasswordModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">كلمة المرور الحالية <span class="req">*</span></label>
+        <input type="password" id="cp_current" class="form-control-custom" placeholder="أدخل كلمة المرور الحالية">
+      </div>
+      <div class="form-group">
+        <label class="form-label">كلمة المرور الجديدة <span class="req">*</span></label>
+        <input type="password" id="cp_new" class="form-control-custom" placeholder="أدخل كلمة المرور الجديدة" oninput="checkPassword()">
+        <div class="password-req" id="req_len"><span class="icon">○</span> 8 أحرف على الأقل</div>
+        <div class="password-req" id="req_upper"><span class="icon">○</span> حرف كبير واحد</div>
+        <div class="password-req" id="req_num"><span class="icon">○</span> رقم واحد</div>
+        <div class="password-req" id="req_special"><span class="icon">○</span> رمز خاص (!@#$)</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">تأكيد كلمة المرور <span class="req">*</span></label>
+        <input type="password" id="cp_confirm" class="form-control-custom" placeholder="أعد كتابة كلمة المرور">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="hideModal('changePasswordModal')">إلغاء</button>
+      <button class="btn-primary-custom" onclick="changePassword()">✓ تغيير كلمة المرور</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/shared.js"></script>
+<script>
+function showModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function hideModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+function closeModalOutside(e,id){ if(e.target.id===id) hideModal(id); }
+function saveProfile(){ hideModal('editProfileModal'); Toast.success('✅ تم حفظ المعلومات بنجاح'); }
+function saveNotifications(){ Toast.success('✅ تم حفظ إعدادات الإشعارات'); }
+function logoutAll(){ UI.confirm('هل تريد تسجيل الخروج من جميع الأجهزة؟', ()=>{ Toast.success('تم تسجيل الخروج من جميع الأجهزة'); }); }
+function deleteAccount(){ UI.confirm('⚠️ هل تريد حذف حسابك نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.', ()=>{ Toast.error('تم حذف الحساب'); }); }
+function changePassword(){
+  const cur = document.getElementById('cp_current').value;
+  const nw  = document.getElementById('cp_new').value;
+  const conf= document.getElementById('cp_confirm').value;
+  if(!cur){ Toast.warning('أدخل كلمة المرور الحالية'); return; }
+  if(!nw){ Toast.warning('أدخل كلمة المرور الجديدة'); return; }
+  if(nw!==conf){ Toast.warning('كلمتا المرور غير متطابقتين'); return; }
+  hideModal('changePasswordModal');
+  Toast.success('✅ تم تغيير كلمة المرور بنجاح');
+}
+function checkPassword(){
+  const pw = document.getElementById('cp_new').value;
+  const checks = [
+    { id:'req_len',     test: pw.length>=8 },
+    { id:'req_upper',   test: /[A-Z]/.test(pw) },
+    { id:'req_num',     test: /[0-9]/.test(pw) },
+    { id:'req_special', test: /[!@#$%^&*(),.?":{}|<>]/.test(pw) },
+  ];
+  checks.forEach(c => {
+    const el = document.getElementById(c.id);
+    if(c.test){ el.classList.add('met'); el.querySelector('.icon').textContent='●'; }
+    else      { el.classList.remove('met'); el.querySelector('.icon').textContent='○'; }
+  });
+}
+</script>
+</body>
+</html>

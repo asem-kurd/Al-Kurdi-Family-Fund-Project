@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.0">
+  <title>المعاملات · صندوق التكافل العائلي</title>
+  <link rel="stylesheet" href="assets/shared.css">
+  <style>
+    .balance-strip{
+      background:linear-gradient(135deg,var(--primary) 0%,#1e5f8e 60%,#2176ae 100%);
+      border-radius:var(--radius-lg); padding:1.5rem 2rem;
+      color:#fff; display:flex; align-items:center;
+      justify-content:space-around; flex-wrap:wrap; gap:1.5rem;
+      margin-bottom:1.5rem; box-shadow:var(--shadow-md);
+      position:relative; overflow:hidden;
+    }
+    .balance-strip::before{content:'';position:absolute;top:-60px;left:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04);}
+    .bs-item{text-align:center;}
+    .bs-item .lbl{font-size:12px;opacity:.8;margin-bottom:4px;}
+    .bs-item .val{font-size:30px;font-weight:700;line-height:1;}
+    .bs-item .sub{font-size:12px;opacity:.65;margin-top:3px;}
+    .bs-divider{width:1px;height:60px;background:rgba(255,255,255,.2);}
+
+    .type-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .type-deposit{background:var(--success-light);}
+    .type-withdrawal{background:var(--danger-light);}
+
+    .amount-plus{color:var(--success);font-size:15px;font-weight:700;}
+    .amount-minus{color:var(--danger);font-size:15px;font-weight:700;}
+
+    .detail-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--gray-100);}
+    .detail-row:last-child{border-bottom:none;}
+    .detail-row .dlbl{font-size:13px;color:var(--gray-500);font-weight:500;}
+    .detail-row .dval{font-size:14px;font-weight:700;color:var(--gray-800);}
+
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+    .chart-wrap{display:flex;align-items:flex-end;gap:8px;height:80px;padding:0 4px;}
+    .chart-bar-group{display:flex;align-items:flex-end;gap:3px;flex:1;}
+    .chart-bar{flex:1;border-radius:3px 3px 0 0;transition:height .4s ease,opacity .2s;cursor:pointer;min-width:8px;}
+    .chart-bar:hover{opacity:.8;}
+    .chart-labels{display:flex;gap:8px;margin-top:5px;}
+    .chart-label{flex:1;text-align:center;font-size:10px;color:var(--gray-400);font-weight:500;}
+
+    .audit-tag{display:inline-flex;align-items:center;gap:4px;background:var(--info-light);color:var(--info-dark);border:1px solid var(--info-border);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;}
+
+    @media(max-width:700px){.bs-divider{display:none;}.form-row{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<nav class="app-navbar">
+  <button class="nav-toggle" onclick="MobileNav.toggleSidebar()" aria-label="القائمة">☰</button>
+  <a href="admin-dashboard.html" class="navbar-brand">
+    <div class="brand-icon">🤝</div>
+    <span>صندوق التكافل</span>
+    <span class="role-badge role-admin">أدمن</span>
+  </a>
+  <div class="nav-links">
+    <a href="admin-dashboard.html" class="nav-link">🏠 الرئيسية</a>
+    <a href="members.html"         class="nav-link">👥 الأعضاء</a>
+    <a href="transactions.html"    class="nav-link active">💰 المعاملات</a>
+    <a href="withdrawals.html"     class="nav-link">🚨 السحوبات</a>
+    <a href="meetings.html"        class="nav-link">📅 الاجتماعات</a>
+  </div>
+  <div class="navbar-right">
+    <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+    <div class="user-avatar">عم</div>
+  </div>
+</nav>
+
+<div class="sidebar-overlay"></div>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="brand">🤝 صندوق التكافل</span>
+      <button class="sidebar-close" onclick="MobileNav.closeSidebar()">✕</button>
+    </div>
+    <div class="sidebar-section-title">القائمة الرئيسية</div>
+    <a href="admin-dashboard.html" class="sidebar-link"><span class="s-icon">🏠</span> الرئيسية</a>
+    <a href="members.html"         class="sidebar-link"><span class="s-icon">👥</span> إدارة الأعضاء</a>
+    <a href="transactions.html"    class="sidebar-link active"><span class="s-icon">💰</span> المعاملات</a>
+    <a href="withdrawals.html"     class="sidebar-link"><span class="s-icon">🚨</span> طلبات السحب<span class="sidebar-badge">1</span></a>
+    <a href="meetings.html"        class="sidebar-link"><span class="s-icon">📅</span> الاجتماعات</a>
+    <div class="sidebar-section-title">الإجراءات</div>
+    <a href="#" class="sidebar-link" onclick="showModal('addTxModal');return false;"><span class="s-icon">➕</span> تسجيل معاملة</a>
+    <a href="#" class="sidebar-link" onclick="exportData();return false;"><span class="s-icon">📥</span> تصدير التقرير</a>
+    <a href="#" class="sidebar-link"><span class="s-icon">📊</span> التحليلات</a>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="u-avatar">عم</div>
+        <div><div class="u-name">عبدالله المدير</div><div class="u-role">مدير النظام</div></div>
+      </div>
+      <button class="btn-logout" onclick="Auth.logout()">🚪 تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>💰 سجل المعاملات</h1>
+        <p>جميع الإيداعات والسحوبات · سجل دائم غير قابل للتعديل</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-outline-custom" onclick="exportData()">📥 تصدير CSV</button>
+        <button class="btn-outline-custom" onclick="exportData()">🖨️ طباعة</button>
+        <button class="btn-primary-custom" onclick="showModal('addTxModal')">➕ تسجيل معاملة</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-icon">💳</span>
+        <div class="stat-label">إجمالي الإيداعات</div>
+        <div class="stat-value" style="color:var(--success);" id="statDeposits">3,480</div>
+        <div class="stat-sub">دينار أردني</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📤</span>
+        <div class="stat-label">إجمالي السحوبات</div>
+        <div class="stat-value" style="color:var(--danger);" id="statWithdrawals">633</div>
+        <div class="stat-sub">دينار أردني</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🏦</span>
+        <div class="stat-label">الرصيد الحالي</div>
+        <div class="stat-value" style="color:var(--primary);" id="statBalance">2,847</div>
+        <div class="stat-sub">دينار أردني</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📊</span>
+        <div class="stat-label">عدد المعاملات</div>
+        <div class="stat-value" style="color:var(--info);" id="statCount">24</div>
+        <div class="stat-sub">معاملة كلية</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📅</span>
+        <div class="stat-label">هذا الشهر</div>
+        <div class="stat-value" style="color:var(--warning);" id="statMonth">27</div>
+        <div class="stat-sub">مايو 2026</div>
+      </div>
+    </div>
+
+    <div class="balance-strip">
+      <div class="bs-item">
+        <div class="lbl">💳 إجمالي الإيداعات</div>
+        <div class="val">3,480<small style="font-size:16px;opacity:.75;"> د.أ</small></div>
+        <div class="sub">192 دفعة اشتراك</div>
+      </div>
+      <div class="bs-divider"></div>
+      <div class="bs-item">
+        <div class="lbl">📤 إجمالي السحوبات</div>
+        <div class="val">633<small style="font-size:16px;opacity:.75;"> د.أ</small></div>
+        <div class="sub">3 سحوبات طارئة</div>
+      </div>
+      <div class="bs-divider"></div>
+      <div class="bs-item">
+        <div class="lbl">🏦 الرصيد المتاح الآن</div>
+        <div class="val" style="font-size:40px;letter-spacing:-1px;">2,847<small style="font-size:18px;opacity:.75;"> د.أ</small></div>
+        <div class="bh-live"><span class="live-dot"></span> محدّث لحظياً</div>
+      </div>
+      <div class="bs-divider"></div>
+      <div class="bs-item">
+        <div class="lbl">📈 التحصيل الشهري المتوسط</div>
+        <div class="val">34.5<small style="font-size:16px;opacity:.75;"> د.أ</small></div>
+        <div class="sub">آخر 4 أشهر</div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:1.5rem;">
+      <div class="panel-header">
+        <h2><span class="ph-icon">📈</span> تطور الرصيد الشهري</h2>
+        <div>
+          <select id="chartYear" onchange="renderChart()" class="form-control-custom" style="min-height:2rem;padding:0.25rem 0.75rem;font-size:0.8125rem;">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap" id="chartBars"></div>
+        <div class="chart-labels" id="chartLabels"></div>
+        <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;">
+          <span style="display:flex;align-items:center;gap:6px;color:var(--gray-500);"><span style="width:12px;height:12px;background:var(--success);border-radius:2px;display:inline-block;"></span>إيداعات</span>
+          <span style="display:flex;align-items:center;gap:6px;color:var(--gray-500);"><span style="width:12px;height:12px;background:var(--danger);border-radius:2px;display:inline-block;"></span>سحوبات</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tx-table-wrap">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--gray-200);">
+        <div class="tab-bar" style="margin-bottom:14px;">
+          <button class="tab-btn active" id="tab-all"        onclick="setTab('all')">كل المعاملات <span id="cnt-all" style="font-size:11px;background:var(--gray-200);padding:1px 6px;border-radius:8px;margin-right:4px;"></span></button>
+          <button class="tab-btn"        id="tab-deposit"    onclick="setTab('deposit')">إيداعات <span id="cnt-deposit" style="font-size:11px;background:var(--success-light);color:var(--success-dark);padding:1px 6px;border-radius:8px;margin-right:4px;"></span></button>
+          <button class="tab-btn"        id="tab-withdrawal" onclick="setTab('withdrawal')">سحوبات <span id="cnt-withdrawal" style="font-size:11px;background:var(--danger-light);color:var(--danger-dark);padding:1px 6px;border-radius:8px;margin-right:4px;"></span></button>
+        </div>
+        <div class="filter-bar" style="margin-bottom:0;border-radius:var(--radius-md);padding:10px 14px;">
+          <input type="text" id="searchTx"   placeholder="🔍 اسم العضو أو الوصف..." oninput="applyFilters()">
+          <input type="month" id="filterMonth" onchange="applyFilters()" title="فلتر الشهر">
+          <select id="filterMember" onchange="applyFilters()">
+            <option value="">كل الأعضاء</option>
+          </select>
+          <div class="filter-sep"></div>
+          <span class="filter-clear" onclick="clearFilters()">✕ مسح</span>
+          <span class="filter-result" id="filterResult">24 معاملة</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table" id="txTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>النوع</th>
+              <th>العضو</th>
+              <th>الوصف</th>
+              <th>التاريخ</th>
+              <th>المبلغ</th>
+              <th>الرصيد بعد</th>
+              <th>الحالة</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="txTbody"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" id="txEmpty" style="display:none;">
+        <span class="es-icon">🔍</span>
+        <p>لا توجد معاملات تطابق الفلتر</p>
+      </div>
+
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+  </main>
+</div>
+
+
+<div class="modal-overlay" id="detailModal" onclick="closeModalOutside(event,'detailModal')">
+  <div class="modal-box">
+    <div class="modal-header" id="detailModalHeader">
+      <h3>📋 تفاصيل المعاملة</h3>
+      <button class="modal-close" onclick="hideModal('detailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="detailModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="hideModal('detailModal')">إغلاق</button>
+      <button class="btn-outline-custom" onclick="printTx()">🖨️ طباعة</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="addTxModal" onclick="closeModalOutside(event,'addTxModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>➕ تسجيل معاملة جديدة</h3>
+      <button class="modal-close" onclick="hideModal('addTxModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">نوع المعاملة <span class="req">*</span></label>
+        <select id="tx_type" class="form-control-custom" onchange="toggleTxFields()">
+          <option value="">— اختر النوع —</option>
+          <option value="deposit">💳 إيداع (اشتراك شهري)</option>
+          <option value="withdrawal">📤 سحب طارئ</option>
+        </select>
+      </div>
+      <div id="tx_member_wrap" class="form-group">
+        <label class="form-label">العضو <span class="req">*</span></label>
+        <select id="tx_member" class="form-control-custom">
+          <option value="">— اختر العضو —</option>
+        </select>
+      </div>
+      <div id="tx_month_wrap" class="form-group" style="display:none;">
+        <label class="form-label">شهر الاشتراك <span class="req">*</span></label>
+        <select id="tx_month" class="form-control-custom">
+          <option value="2026-05">مايو 2026</option>
+          <option value="2026-04">أبريل 2026</option>
+          <option value="2026-03">مارس 2026</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">المبلغ (د.أ) <span class="req">*</span></label>
+          <input type="number" id="tx_amount" class="form-control-custom" value="3" min="0.5" step="0.5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">التاريخ <span class="req">*</span></label>
+          <input type="date" id="tx_date" class="form-control-custom">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الوصف <span class="req">*</span></label>
+        <input type="text" id="tx_desc" class="form-control-custom" placeholder="مثال: اشتراك مايو 2026">
+      </div>
+      <div id="tx_withdrawal_info" class="form-group" style="display:none;">
+        <label class="form-label">تفاصيل السحب</label>
+        <textarea id="tx_reason" class="form-control-custom" rows="2" placeholder="سبب السحب بالتفصيل..."></textarea>
+      </div>
+      <div class="alert-info" id="tx_immutable_note">
+        🔒 المعاملات سجل دائم لا يمكن تعديله أو حذفه بعد الحفظ
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="hideModal('addTxModal')">إلغاء</button>
+      <button class="btn-primary-custom" onclick="saveTransaction()">✓ حفظ المعاملة</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="assets/shared.js"></script>
+<script>
+const MEMBER_NAMES = ['أحمد محمد','عمر خالد','سعيد علي','محمد رشيد','خالد حسن','فيصل سالم','عصام الكيلاني','راشد الزيود','ياسر المجالي','نادر العبابسة','بلال الشرمان','وسيم الحوامدة'];
+const MEMBER_COLORS = [['#E6F1FB','#185FA5'],['#E1F5EE','#0F6E56'],['#FAEEDA','#854F0B'],['#EEEDFE','#534AB7'],['#FCEBEB','#A32D2D'],['#E1F5EE','#085041'],['#FFF3CD','#856404'],['#D1ECF1','#0C5460'],['#E2E3E5','#383D41'],['#E6F1FB','#185FA5'],['#FAEEDA','#854F0B'],['#E1F5EE','#0F6E56']];
+
+let TRANSACTIONS = [];
+let runningBalance = 0;
+let txId = 1;
+
+const monthRange = [
+  ['2025-01-01','يناير 2025'],['2025-02-01','فبراير 2025'],['2025-03-01','مارس 2025'],
+  ['2025-04-01','أبريل 2025'],['2025-05-01','مايو 2025'],['2025-06-01','يونيو 2025'],
+  ['2025-07-01','يوليو 2025'],['2025-08-01','أغسطس 2025'],['2025-09-01','سبتمبر 2025'],
+  ['2025-10-01','أكتوبر 2025'],['2025-11-01','نوفمبر 2025'],['2025-12-01','ديسمبر 2025'],
+  ['2026-01-01','يناير 2026'],['2026-02-01','فبراير 2026'],['2026-03-01','مارس 2026'],
+  ['2026-04-01','أبريل 2026'],
+];
+
+monthRange.forEach(([date, label]) => {
+  MEMBER_NAMES.forEach((name, idx) => {
+    runningBalance += 3;
+    TRANSACTIONS.push({ id: txId++, type:'deposit', member:name, memberIdx:idx, desc:`اشتراك ${label}`, date, amount:3, balanceAfter:runningBalance, status:'confirmed', ref:`TXN-${String(txId).padStart(4,'0')}` });
+  });
+});
+
+runningBalance -= 483;
+TRANSACTIONS.push({ id:txId++, type:'withdrawal', member:'الأدمن', memberIdx:0, desc:'مساعدة وفاة - والد أبو سالم', date:'2026-02-10', amount:483, balanceAfter:runningBalance, status:'confirmed', ref:'WTH-0001' });
+runningBalance -= 150;
+TRANSACTIONS.push({ id:txId++, type:'withdrawal', member:'الأدمن', memberIdx:0, desc:'مساعدة طارئة - عائلة الحسن', date:'2026-04-15', amount:150, balanceAfter:runningBalance, status:'confirmed', ref:'WTH-0002' });
+
+MEMBER_NAMES.slice(0,9).forEach((name,idx) => {
+  runningBalance += 3;
+  TRANSACTIONS.push({ id:txId++, type:'deposit', member:name, memberIdx:idx, desc:'اشتراك مايو 2026', date:'2026-05-01', amount:3, balanceAfter:runningBalance, status:'confirmed', ref:`TXN-${String(txId).padStart(4,'0')}` });
+});
+
+TRANSACTIONS.sort((a,b) => new Date(b.date)-new Date(a.date));
+
+let currentTab = 'all';
+let filtered   = [...TRANSACTIONS];
+const PAGE_SIZE = 15;
+let currentPage = 1;
+
+function setTab(tab) {
+  currentTab = tab;
+  ['all','deposit','withdrawal'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+  });
+  applyFilters();
+}
+
+function applyFilters() {
+  const q     = document.getElementById('searchTx').value.trim().toLowerCase();
+  const month = document.getElementById('filterMonth').value;
+  const mem   = document.getElementById('filterMember').value;
+
+  filtered = TRANSACTIONS.filter(tx => {
+    if(currentTab==='deposit'    && tx.type!=='deposit')    return false;
+    if(currentTab==='withdrawal' && tx.type!=='withdrawal') return false;
+    if(q && !tx.member.toLowerCase().includes(q) && !tx.desc.toLowerCase().includes(q)) return false;
+    if(month && !tx.date.startsWith(month)) return false;
+    if(mem   && tx.member !== mem) return false;
+    return true;
+  });
+
+  currentPage = 1;
+  document.getElementById('filterResult').textContent = filtered.length + ' معاملة';
+  updateCounts();
+  renderPage();
+}
+
+function clearFilters() {
+  document.getElementById('searchTx').value='';
+  document.getElementById('filterMonth').value='';
+  document.getElementById('filterMember').value='';
+  applyFilters();
+}
+
+function updateCounts() {
+  document.getElementById('cnt-all').textContent       = TRANSACTIONS.length;
+  document.getElementById('cnt-deposit').textContent   = TRANSACTIONS.filter(t=>t.type==='deposit').length;
+  document.getElementById('cnt-withdrawal').textContent= TRANSACTIONS.filter(t=>t.type==='withdrawal').length;
+}
+
+function renderPage() {
+  const start = (currentPage-1)*PAGE_SIZE;
+  const page  = filtered.slice(start, start+PAGE_SIZE);
+  const tbody = document.getElementById('txTbody');
+  const empty = document.getElementById('txEmpty');
+
+  if(!filtered.length){ tbody.innerHTML=''; empty.style.display='block'; renderPagination(); return; }
+  empty.style.display='none';
+
+  const dateLabel = d => {
+    const dt = new Date(d);
+    const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}`;
+  };
+
+  tbody.innerHTML = page.map((tx,i) => {
+    const isD   = tx.type==='deposit';
+    const num   = start+i+1;
+    const c     = MEMBER_COLORS[tx.memberIdx%MEMBER_COLORS.length];
+    const init  = tx.member.split(' ').map(w=>w[0]).join('').slice(0,2);
+    return `<tr style="cursor:pointer;" onclick="openDetail(${tx.id})">
+      <td style="color:var(--gray-400);font-size:12px;">${num}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="type-icon ${isD?'type-deposit':'type-withdrawal'}">${isD?'💳':'📤'}</div>
+          <span style="font-size:12px;font-weight:600;color:${isD?'var(--success-dark)':'var(--danger-dark)'};">${isD?'إيداع':'سحب'}</span>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="member-avatar" style="background:${c[0]};color:${c[1]};font-size:11px;">${init}</div>
+          <span style="font-weight:500;font-size:13px;">${tx.member}</span>
+        </div>
+      </td>
+      <td style="font-size:13px;color:var(--gray-600);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${tx.desc}</td>
+      <td style="font-size:13px;color:var(--gray-500);white-space:nowrap;">${dateLabel(tx.date)}</td>
+      <td class="${isD?'amount-plus':'amount-minus'}">${isD?'+':'-'}${tx.amount.toFixed(2)} د.أ</td>
+      <td style="font-size:13px;font-weight:600;color:var(--primary);">${tx.balanceAfter.toLocaleString('ar-JO')} د.أ</td>
+      <td><span class="badge-paid">✓ مؤكدة</span></td>
+      <td>
+        <button class="btn-outline-custom btn-sm-custom" onclick="event.stopPropagation();openDetail(${tx.id})">📋</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = Math.ceil(filtered.length/PAGE_SIZE);
+  const pg    = document.getElementById('pagination');
+  if(total<=1){ pg.innerHTML=''; return; }
+  let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹ السابق</button>`;
+  for(let i=1;i<=total;i++){
+    if(total>7 && i>2 && i<total-1 && Math.abs(i-currentPage)>1){ if(i===3||i===total-2) html+='<span class="page-info">...</span>'; continue; }
+    html+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html+=`<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?'disabled':''}>التالي ›</button>`;
+  html+=`<span class="page-info">${currentPage} من ${total} · ${filtered.length} معاملة</span>`;
+  pg.innerHTML=html;
+}
+
+function goPage(p) {
+  const total=Math.ceil(filtered.length/PAGE_SIZE);
+  if(p<1||p>total) return;
+  currentPage=p; renderPage();
+  document.querySelector('.tx-table-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function openDetail(id) {
+  const tx = TRANSACTIONS.find(t=>t.id===id);
+  if(!tx) return;
+  const isD = tx.type==='deposit';
+  const c   = MEMBER_COLORS[tx.memberIdx%MEMBER_COLORS.length];
+  const init= tx.member.split(' ').map(w=>w[0]).join('').slice(0,2);
+  const dt  = new Date(tx.date);
+  const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const dateStr = `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}`;
+
+  document.getElementById('detailModalHeader').innerHTML = `
+    <h3>${isD?'💳 تفاصيل الإيداع':'📤 تفاصيل السحب'}</h3>
+    <button class="modal-close" onclick="hideModal('detailModal')">✕</button>`;
+
+  document.getElementById('detailModalBody').innerHTML = `
+    <div style="text-align:center;padding:1rem 0 1.5rem;">
+      <div style="width:64px;height:64px;border-radius:50%;background:${isD?'var(--success-light)':'var(--danger-light)'};display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px;">${isD?'💳':'📤'}</div>
+      <div style="font-size:38px;font-weight:700;color:${isD?'var(--success)':'var(--danger)'};">${isD?'+':'-'}${tx.amount.toFixed(2)} د.أ</div>
+      <div style="font-size:13px;color:var(--gray-400);margin-top:4px;">${tx.desc}</div>
+    </div>
+    <div style="background:var(--gray-50);border-radius:var(--radius-md);padding:14px;">
+      <div class="detail-row"><span class="dlbl">رقم المرجع</span><span class="dval"><span class="audit-tag">#${tx.ref}</span></span></div>
+      <div class="detail-row">
+        <span class="dlbl">العضو</span>
+        <span class="dval" style="display:flex;align-items:center;gap:8px;">
+          <div class="member-avatar" style="background:${c[0]};color:${c[1]};font-size:11px;width:28px;height:28px;">${init}</div>
+          ${tx.member}
+        </span>
+      </div>
+      <div class="detail-row"><span class="dlbl">التاريخ</span><span class="dval">${dateStr}</span></div>
+      <div class="detail-row"><span class="dlbl">النوع</span><span class="dval">${isD?'<span class="badge-paid">إيداع</span>':'<span class="badge-danger">سحب</span>'}</span></div>
+      <div class="detail-row"><span class="dlbl">الرصيد بعد المعاملة</span><span class="dval" style="color:var(--primary);">${tx.balanceAfter.toLocaleString('ar-JO')} د.أ</span></div>
+      <div class="detail-row"><span class="dlbl">الحالة</span><span class="dval"><span class="badge-paid">✓ مؤكدة ودائمة</span></span></div>
+      <div class="detail-row"><span class="dlbl">سُجّلت بواسطة</span><span class="dval">عبدالله المدير</span></div>
+    </div>
+    <div class="alert-info" style="margin-top:14px;margin-bottom:0;">
+      🔒 هذه المعاملة مسجلة بشكل دائم ولا يمكن تعديلها أو حذفها للحفاظ على سلامة السجل المالي
+    </div>`;
+
+  showModal('detailModal');
+}
+
+function toggleTxFields() {
+  const type = document.getElementById('tx_type').value;
+  document.getElementById('tx_month_wrap').style.display     = type==='deposit'    ? 'block':'none';
+  document.getElementById('tx_withdrawal_info').style.display= type==='withdrawal' ? 'block':'none';
+  if(type==='deposit')   { document.getElementById('tx_amount').value=3; document.getElementById('tx_desc').value='اشتراك '; }
+  if(type==='withdrawal'){ document.getElementById('tx_amount').value=''; document.getElementById('tx_desc').value=''; }
+}
+
+function saveTransaction() {
+  const type   = document.getElementById('tx_type').value;
+  const member = document.getElementById('tx_member').value;
+  const amount = parseFloat(document.getElementById('tx_amount').value);
+  const date   = document.getElementById('tx_date').value;
+  const desc   = document.getElementById('tx_desc').value.trim();
+
+  if(!type)   { Toast.warning('اختر نوع المعاملة');    return; }
+  if(!member) { Toast.warning('اختر العضو');           return; }
+  if(!amount||amount<=0){ Toast.warning('أدخل المبلغ'); return; }
+  if(!date)   { Toast.warning('أدخل التاريخ');         return; }
+  if(!desc)   { Toast.warning('أدخل الوصف');           return; }
+
+  const isD = type==='deposit';
+  const newBal = isD ? runningBalance+amount : runningBalance-amount;
+  if(!isD && newBal<0){ Toast.error('المبلغ يتجاوز الرصيد المتاح'); return; }
+
+  const newTx = {
+    id: ++txId, type, member, memberIdx: MEMBER_NAMES.indexOf(member),
+    desc, date, amount, balanceAfter: newBal,
+    status:'confirmed', ref:`TXN-${String(txId).padStart(4,'0')}`
+  };
+  runningBalance = newBal;
+  TRANSACTIONS.unshift(newTx);
+
+  hideModal('addTxModal');
+  Toast.success(`✅ تم تسجيل المعاملة: ${isD?'+':'-'}${amount} د.أ`);
+  applyFilters();
+  updateStats();
+}
+
+function renderChart() {
+  const months=['يناير','فبراير','مارس','أبريل','مايو'];
+  const year = document.getElementById('chartYear').value;
+  const data = months.map((m,i) => {
+    const prefix = `${year}-${String(i+1).padStart(2,'0')}`;
+    const deps = TRANSACTIONS.filter(t=>t.type==='deposit'    && t.date.startsWith(prefix)).reduce((s,t)=>s+t.amount,0);
+    const wds  = TRANSACTIONS.filter(t=>t.type==='withdrawal' && t.date.startsWith(prefix)).reduce((s,t)=>s+t.amount,0);
+    return { month:m, deps, wds };
+  });
+  const maxVal = Math.max(...data.flatMap(d=>[d.deps,d.wds]), 1);
+  document.getElementById('chartBars').innerHTML = data.map(d => `
+    <div class="chart-bar-group">
+      <div class="chart-bar" style="height:${Math.max((d.deps/maxVal)*76,2)}px;background:var(--success);opacity:.85;" title="إيداعات: ${d.deps} د.أ"></div>
+      <div class="chart-bar" style="height:${Math.max((d.wds/maxVal)*76,d.wds?4:2)}px;background:var(--danger);opacity:.75;" title="سحوبات: ${d.wds} د.أ"></div>
+    </div>`).join('');
+  document.getElementById('chartLabels').innerHTML = data.map(d=>`<span class="chart-label">${d.month}</span>`).join('');
+}
+
+function updateStats() {
+  const deps = TRANSACTIONS.filter(t=>t.type==='deposit').reduce((s,t)=>s+t.amount,0);
+  const wds  = TRANSACTIONS.filter(t=>t.type==='withdrawal').reduce((s,t)=>s+t.amount,0);
+  document.getElementById('statDeposits').textContent    = deps.toLocaleString('ar-JO');
+  document.getElementById('statWithdrawals').textContent = wds.toLocaleString('ar-JO');
+  document.getElementById('statBalance').textContent     = (deps-wds).toLocaleString('ar-JO');
+  document.getElementById('statCount').textContent       = TRANSACTIONS.length;
+}
+
+function exportData() { Toast.info('📥 جاري تحضير ملف التصدير...'); }
+function printTx()    { Toast.info('🖨️ جاري فتح نافذة الطباعة...'); }
+
+function showModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function hideModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+function closeModalOutside(e,id){ if(e.target.id===id) hideModal(id); }
+
+function populateSelects() {
+  const opts = MEMBER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('filterMember').innerHTML = '<option value="">كل الأعضاء</option>'+opts;
+  document.getElementById('tx_member').innerHTML    = '<option value="">— اختر العضو —</option>'+opts;
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('tx_date').value = today;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  populateSelects();
+  updateCounts();
+  applyFilters();
+  renderChart();
+  updateStats();
+});
+</script>
+</body>
+</html>

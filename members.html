@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة الأعضاء · صندوق التكافل العائلي</title>
+  <link rel="stylesheet" href="assets/shared.css">
+  <style>
+    .members-grid{display:grid;grid-template-columns:1fr;gap:0.875rem;margin-bottom:1.25rem;}
+    .member-card{background:#fff;border:0.0625rem solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow .2s,transform .2s;}
+    .member-card:hover{box-shadow:var(--shadow-md);transform:translateY(-0.125rem);}
+    .mc-top{padding:1rem;display:flex;align-items:flex-start;gap:0.8125rem;}
+    .mc-avatar{width:3.25rem;height:3.25rem;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;border:0.125rem solid rgba(0,0,0,.06);}
+    .mc-info{flex:1;min-width:0;}
+    .mc-name{font-size:0.9375rem;font-weight:700;color:var(--gray-800);margin-bottom:0.1875rem;}
+    .mc-email{font-size:0.6875rem;color:var(--gray-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .mc-id{font-size:0.625rem;color:var(--gray-300);margin-top:0.125rem;}
+    .mc-status-dot{width:0.625rem;height:0.625rem;border-radius:50%;flex-shrink:0;margin-top:0.25rem;border:0.125rem solid #fff;box-shadow:0 0 0 0.0625rem currentColor;}
+    .dot-paid{color:var(--success);background:var(--success);}
+    .dot-unpaid{color:var(--warning);background:var(--warning);}
+    .mc-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:0.0625rem solid var(--gray-100);}
+    .mc-stat{padding:0.625rem;text-align:center;border-left:0.0625rem solid var(--gray-100);}
+    .mc-stat:last-child{border-left:none;}
+    .mc-stat .lbl{font-size:0.5625rem;color:var(--gray-400);font-weight:600;margin-bottom:0.1875rem;text-transform:uppercase;letter-spacing:.025rem;}
+    .mc-stat .val{font-size:0.9375rem;font-weight:700;}
+    .mc-footer{padding:0.625rem 0.875rem;border-top:0.0625rem solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;background:var(--gray-50);flex-wrap:wrap;gap:0.5rem;}
+    .mc-progress-wrap{flex:1;margin-left:0.625rem;min-width:4rem;}
+    #tableView{display:none;}
+    .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:5000;display:none;align-items:stretch;justify-content:flex-end;}
+    .detail-overlay.open{display:flex;}
+    .detail-panel{background:#fff;width:90vw;max-width:27.5rem;height:100vh;overflow-y:auto;box-shadow:-0.25rem 0 1.875rem rgba(0,0,0,.15);animation:slideIn .25s ease;}
+    @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+    .detail-header{background:var(--primary);padding:1.25rem;color:#fff;position:sticky;top:0;z-index:1;}
+    .detail-header .close-btn{position:absolute;top:0.875rem;left:0.875rem;width:1.875rem;height:1.875rem;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:0.9375rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .detail-header .close-btn:hover{background:rgba(255,255,255,.25);}
+    .detail-avatar{width:4rem;height:4rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.625rem;font-weight:700;border:0.1875rem solid rgba(255,255,255,.3);margin-bottom:0.625rem;}
+    .detail-name{font-size:1.25rem;font-weight:700;margin-bottom:0.1875rem;}
+    .detail-email{font-size:0.8125rem;opacity:.8;}
+    .detail-body{padding:1rem;}
+    .detail-section{margin-bottom:1.25rem;}
+    .detail-section h3{font-size:0.875rem;font-weight:700;color:var(--gray-600);margin:0 0 0.75rem;padding-bottom:0.4375rem;border-bottom:0.0625rem solid var(--gray-200);}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.625rem;}
+    .info-item{background:var(--gray-50);border-radius:var(--radius-md);padding:0.625rem 0.75rem;}
+    .info-item .lbl{font-size:0.625rem;color:var(--gray-400);font-weight:600;margin-bottom:0.1875rem;}
+    .info-item .val{font-size:0.8125rem;font-weight:600;color:var(--gray-800);}
+    .months-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:0.3125rem;}
+    .mm-cell{aspect-ratio:1;border-radius:0.25rem;display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:700;cursor:default;border:0.0625rem solid transparent;}
+    .mm-paid{background:var(--success-light);color:var(--success-dark);border-color:var(--success-border);}
+    .mm-current{background:var(--primary);color:#fff;}
+    .mm-pending{background:var(--warning-light);color:var(--warning-dark);border-color:var(--warning-border);}
+    .mm-future{background:var(--gray-100);color:var(--gray-300);}
+    .view-toggle{display:flex;gap:0.25rem;}
+    .vt-btn{width:2.125rem;height:2.125rem;border-radius:var(--radius-sm);border:0.0625rem solid var(--gray-300);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.9375rem;transition:all .15s;color:var(--gray-500);}
+    .vt-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+    @media(min-width:30rem){.members-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(min-width:48rem){
+      .detail-panel{width:27.5rem;max-width:90vw;}
+      .detail-body{padding:1.25rem;}
+      .months-mini{grid-template-columns:repeat(6,1fr);}
+    }
+    @media(min-width:64rem){.members-grid{grid-template-columns:repeat(3,1fr);gap:1rem;}}
+  </style>
+</head>
+<body>
+
+<nav class="app-navbar">
+  <button class="nav-toggle" onclick="MobileNav.toggleSidebar()" aria-label="القائمة">☰</button>
+  <a href="admin-dashboard.html" class="navbar-brand"><div class="brand-icon">🤝</div><span>صندوق التكافل</span><span class="role-badge role-admin">أدمن</span></a>
+  <div class="nav-links">
+    <a href="admin-dashboard.html" class="nav-link">🏠 الرئيسية</a>
+    <a href="members.html" class="nav-link active">👥 الأعضاء</a>
+    <a href="transactions.html" class="nav-link">💰 المعاملات</a>
+    <a href="withdrawals.html" class="nav-link">🚨 السحوبات</a>
+    <a href="meetings.html" class="nav-link">📅 الاجتماعات</a>
+  </div>
+  <div class="navbar-right">
+    <button class="notif-btn" aria-label="الإشعارات">🔔<span class="notif-dot"></span></button>
+    <div class="user-avatar">عم</div>
+  </div>
+</nav>
+
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-header"><span class="brand">🤝 صندوق التكافل</span><button class="sidebar-close" onclick="MobileNav.closeSidebar()">✕</button></div>
+  <div class="sidebar-section-title">القائمة الرئيسية</div>
+  <a href="admin-dashboard.html" class="sidebar-link"><span class="s-icon">🏠</span> الرئيسية</a>
+  <a href="members.html" class="sidebar-link active"><span class="s-icon">👥</span> إدارة الأعضاء</a>
+  <a href="transactions.html" class="sidebar-link"><span class="s-icon">💰</span> المعاملات</a>
+  <a href="withdrawals.html" class="sidebar-link"><span class="s-icon">🚨</span> طلبات السحب<span class="sidebar-badge">1</span></a>
+  <a href="meetings.html" class="sidebar-link"><span class="s-icon">📅</span> الاجتماعات</a>
+  <div class="sidebar-section-title">الإدارة</div>
+  <a href="#" class="sidebar-link" onclick="showModal('addMemberModal');return false;"><span class="s-icon">➕</span> إضافة عضو</a>
+  <a href="#" class="sidebar-link" onclick="showModal('paymentModal');return false;"><span class="s-icon">💳</span> تسجيل دفعة</a>
+  <div class="sidebar-footer">
+    <div class="sidebar-user"><div class="u-avatar">عم</div><div><div class="u-name">عبدالله المدير</div><div class="u-role">مدير النظام</div></div></div>
+    <button class="btn-logout">🚪 تسجيل الخروج</button>
+  </div>
+</aside>
+
+<main class="main-content">
+  <div class="topbar">
+    <div class="topbar-left"><h1>👥 إدارة الأعضاء</h1><p>إجمالي 12 عضو نشط · مايو 2026</p></div>
+    <div class="topbar-right">
+      <button class="btn-outline-custom" onclick="exportMembers()">📥 تصدير</button>
+      <button class="btn-outline-custom" onclick="sendAllReminders()">📨 تذكير</button>
+      <button class="btn-primary-custom" onclick="showModal('addMemberModal')">➕ إضافة</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-label">إجمالي</div><div class="stat-value" style="color:var(--gray-800);" id="statTotal">12</div><div class="stat-sub">نشط</div></div>
+    <div class="stat-card"><span class="stat-icon">✅</span><div class="stat-label">دفعوا</div><div class="stat-value" style="color:var(--success);" id="statPaid">9</div><div class="stat-sub">من 12</div></div>
+    <div class="stat-card"><span class="stat-icon">⏳</span><div class="stat-label">لم يدفعوا</div><div class="stat-value" style="color:var(--warning);" id="statUnpaid">3</div><div class="stat-sub">تذكير</div></div>
+    <div class="stat-card"><span class="stat-icon">💰</span><div class="stat-label">التحصيل</div><div class="stat-value" style="color:var(--info);" id="statTotal2">576</div><div class="stat-sub">د.أ</div></div>
+    <div class="stat-card"><span class="stat-icon">📈</span><div class="stat-label">النسبة</div><div class="stat-value" style="color:var(--warning);" id="statPct">75%</div><div class="stat-sub">مايو</div></div>
+  </div>
+
+  <div class="filter-bar">
+    <input type="text" id="searchInput" placeholder="🔍 ابحث بالاسم أو البريد" oninput="applyFilters()">
+    <select id="filterStatus" onchange="applyFilters()"><option value="all">كل الحالات</option><option value="paid">دفعوا</option><option value="unpaid">لم يدفعوا</option></select>
+    <select id="filterCommit" onchange="applyFilters()"><option value="all">كل الالتزامات</option><option value="high">ممتاز (100%)</option><option value="mid">جيد (80-99%)</option><option value="low">ضعيف (&lt;80%)</option></select>
+    <span class="filter-clear" onclick="clearFilters()">✕ مسح</span>
+    <span class="filter-result" id="filterResult">عرض 12 من 12</span>
+    <div class="view-toggle">
+      <button class="vt-btn active" id="btnGrid" onclick="setView('grid')" aria-label="عرض بطاقات">⊞</button>
+      <button class="vt-btn" id="btnList" onclick="setView('list')" aria-label="عرض جدول">☰</button>
+    </div>
+  </div>
+
+  <div id="gridView"><div class="members-grid" id="membersGrid"></div></div>
+  <div id="tableView">
+    <div class="table-wrap">
+      <table class="data-table"><thead><tr><th>#</th><th>العضو</th><th>البريد</th><th>حالة مايو</th><th>الإجمالي</th><th>الالتزام</th><th>إجراءات</th></tr></thead>
+      <tbody id="membersListTbody"></tbody></table>
+      <div class="panel-footer"><span id="listCount">12 عضو</span><button class="btn-outline-custom btn-sm-custom" onclick="exportMembers()">📥 تصدير</button></div>
+    </div>
+  </div>
+  <div class="empty-state" id="emptyState" style="display:none;"><span class="es-icon">🔍</span><p>لا توجد نتائج</p></div>
+</main>
+
+<div class="detail-overlay" id="detailOverlay" onclick="closeDetailOutside(event)">
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-header" id="detailHeader">
+      <button class="close-btn" onclick="closeDetail()">✕</button>
+      <div class="detail-avatar" id="detailAvatar"></div>
+      <div class="detail-name" id="detailName"></div>
+      <div class="detail-email" id="detailEmail"></div>
+    </div>
+    <div class="detail-body" id="detailBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addMemberModal" onclick="closeModalOutside(event,'addMemberModal')">
+  <div class="modal-box">
+    <div class="modal-header"><h3 id="memberModalTitle">👤 إضافة عضو جديد</h3><button class="modal-close" onclick="hideModal('addMemberModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editMemberId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+        <div class="form-group"><label class="form-label">الاسم الأول <span class="req">*</span></label><input type="text" id="mb_fname" class="form-control-custom" placeholder="أحمد"></div>
+        <div class="form-group"><label class="form-label">العائلة <span class="req">*</span></label><input type="text" id="mb_lname" class="form-control-custom" placeholder="محمد"></div>
+      </div>
+      <div class="form-group"><label class="form-label">البريد <span class="req">*</span></label><input type="email" id="mb_email" class="form-control-custom" placeholder="example@email.com"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+        <div class="form-group"><label class="form-label">الهاتف</label><input type="tel" id="mb_phone" class="form-control-custom" placeholder="07X-XXXX-XXX"></div>
+        <div class="form-group"><label class="form-label">الدور</label><select id="mb_role" class="form-control-custom"><option value="Member">عضو</option><option value="Admin">مدير</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline-custom" onclick="hideModal('addMemberModal')">إلغاء</button><button class="btn-primary-custom" id="saveMemberBtn" onclick="saveMember()">✓ إضافة</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="paymentModal" onclick="closeModalOutside(event,'paymentModal')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>💳 تسجيل دفعة</h3><button class="modal-close" onclick="hideModal('paymentModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">العضو <span class="req">*</span></label><select id="pm_member" class="form-control-custom"><option value="">— اختر —</option></select></div>
+      <div class="form-group"><label class="form-label">الشهر <span class="req">*</span></label><select id="pm_month" class="form-control-custom"><option value="2026-05">مايو 2026</option><option value="2026-04">أبريل 2026</option></select></div>
+      <div class="form-group"><label class="form-label">المبلغ (د.أ) <span class="req">*</span></label><input type="number" id="pm_amount" class="form-control-custom" value="3" min="1" step="0.5"><div class="form-text">الاشتراك = 3 د.أ</div></div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline-custom" onclick="hideModal('paymentModal')">إلغاء</button><button class="btn-primary-custom" onclick="savePayment()">✓ حفظ</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="deleteModal" onclick="closeModalOutside(event,'deleteModal')">
+  <div class="modal-box" style="max-width:23.75rem;">
+    <div class="modal-header"><h3>⚠️ تأكيد الحذف</h3><button class="modal-close" onclick="hideModal('deleteModal')">✕</button></div>
+    <div class="modal-body" style="text-align:center;padding:1.5rem;"><div style="font-size:2.625rem;margin-bottom:0.875rem;">🗑️</div><p style="font-size:0.9375rem;color:var(--gray-700);margin:0 0 0.5rem;" id="deleteConfirmText"></p><p style="font-size:0.8125rem;color:var(--danger);margin:0;">لا يمكن التراجع</p></div>
+    <div class="modal-footer" style="justify-content:center;"><button class="btn-outline-custom" onclick="hideModal('deleteModal')">إلغاء</button><button class="btn-danger-custom" id="confirmDeleteBtn">🗑️ تأكيد</button></div>
+  </div>
+</div>
+
+<script src="assets/shared.js"></script>
+<script>
+let MEMBERS=[{id:1,fname:'أحمد',lname:'محمد',email:'ahmed@family-fund.jo',phone:'079-1234-567',joinDate:'2025-01',role:'Member',paidMay:true,total:48,months:16,color:'#E6F1FB',tc:'#185FA5'},{id:2,fname:'عمر',lname:'خالد',email:'omar@family-fund.jo',phone:'078-2345-678',joinDate:'2025-01',role:'Member',paidMay:true,total:48,months:16,color:'#E1F5EE',tc:'#0F6E56'},{id:3,fname:'سعيد',lname:'علي',email:'saeed@family-fund.jo',phone:'077-3456-789',joinDate:'2025-01',role:'Member',paidMay:false,total:45,months:15,color:'#FAEEDA',tc:'#854F0B'},{id:4,fname:'محمد',lname:'رشيد',email:'rashid@family-fund.jo',phone:'079-4567-890',joinDate:'2025-01',role:'Member',paidMay:true,total:48,months:16,color:'#EEEDFE',tc:'#534AB7'},{id:5,fname:'خالد',lname:'حسن',email:'khalid@family-fund.jo',phone:'078-5678-901',joinDate:'2025-01',role:'Member',paidMay:false,total:42,months:14,color:'#FCEBEB',tc:'#A32D2D'},{id:6,fname:'فيصل',lname:'سالم',email:'faisal@family-fund.jo',phone:'077-6789-012',joinDate:'2025-01',role:'Member',paidMay:true,total:48,months:16,color:'#E1F5EE',tc:'#085041'},{id:7,fname:'عصام',lname:'الكيلاني',email:'essam@family-fund.jo',phone:'079-7890-123',joinDate:'2025-01',role:'Member',paidMay:true,total:48,months:16,color:'#FFF3CD',tc:'#856404'},{id:8,fname:'راشد',lname:'الزيود',email:'rashed@family-fund.jo',phone:'078-8901-234',joinDate:'2025-01',role:'Admin',paidMay:true,total:48,months:16,color:'#D1ECF1',tc:'#0C5460'},{id:9,fname:'ياسر',lname:'المجالي',email:'yasser@family-fund.jo',phone:'077-9012-345',joinDate:'2025-04',role:'Member',paidMay:false,total:39,months:13,color:'#E2E3E5',tc:'#383D41'},{id:10,fname:'نادر',lname:'العبابسة',email:'nader@family-fund.jo',phone:'079-0123-456',joinDate:'2025-01',role:'Member',paidMay:true,total:48,months:16,color:'#E6F1FB',tc:'#185FA5'},{id:11,fname:'بلال',lname:'الشرمان',email:'bilal@family-fund.jo',phone:'078-1234-567',joinDate:'2025-01',role:'Member',paidMay:true,total:48,months:16,color:'#FAEEDA',tc:'#854F0B'},{id:12,fname:'وسيم',lname:'الحوامدة',email:'waseem@family-fund.jo',phone:'077-2345-678',joinDate:'2025-01',role:'Member',paidMay:true,total:48,months:16,color:'#E1F5EE',tc:'#0F6E56'}];
+let currentView='grid',filteredList=[...MEMBERS],deleteTargetId=null;
+
+function renderGrid(list){const c=document.getElementById('membersGrid');if(!list.length){c.innerHTML='';document.getElementById('emptyState').style.display='block';return;}document.getElementById('emptyState').style.display='none';c.innerHTML=list.map(m=>{const name=m.fname+' '+m.lname,initials=m.fname[0]+m.lname[0],pct=Math.round((m.months/16)*100),barColor=pct===100?'var(--success)':pct>=80?'var(--warning)':'var(--danger)';return`<div class="member-card" onclick="openDetail(${m.id})"><div class="mc-top"><div class="mc-avatar" style="background:${m.color};color:${m.tc};">${initials}</div><div class="mc-info"><div class="mc-name">${name}${m.role==='Admin'?'<span class="role-badge role-admin" style="font-size:0.5625rem;vertical-align:middle;margin-right:0.25rem;">أدمن</span>':''}</div><div class="mc-email">${m.email}</div><div class="mc-id">#MBR-${String(m.id).padStart(4,'0')}</div></div><div class="mc-status-dot ${m.paidMay?'dot-paid':'dot-unpaid'}" title="${m.paidMay?'دفع مايو':'لم يدفع مايو'}"></div></div><div class="mc-stats"><div class="mc-stat"><div class="lbl">المدفوع</div><div class="val" style="color:var(--info);">${m.total}<small style="font-size:0.625rem;"> د.أ</small></div></div><div class="mc-stat"><div class="lbl">الأشهر</div><div class="val" style="color:var(--gray-700);">${m.months}/16</div></div><div class="mc-stat"><div class="lbl">مايو</div><div class="val" style="font-size:1.125rem;">${m.paidMay?'✅':'⏳'}</div></div></div><div class="mc-footer"><span style="font-size:0.625rem;font-weight:600;color:${barColor};">الالتزام ${pct}%</span><div class="mc-progress-wrap"><div class="progress-bar-wrap" style="height:0.375rem;"><div class="progress-bar-fill" style="width:${pct}%;background:${barColor};"></div></div></div></div></div>`;}).join('');}
+
+function renderTable(list){const t=document.getElementById('membersListTbody');if(!list.length){t.innerHTML='<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--gray-400);">لا توجد نتائج</td></tr>';return;}t.innerHTML=list.map((m,i)=>{const name=m.fname+' '+m.lname,initials=m.fname[0]+m.lname[0],pct=Math.round((m.months/16)*100),barC=pct===100?'var(--success)':pct>=80?'var(--warning)':'var(--danger)';return`<tr><td style="color:var(--gray-400);font-size:0.75rem;">${i+1}</td><td><div style="display:flex;align-items:center;gap:0.5625rem;"><div class="member-avatar" style="background:${m.color};color:${m.tc};">${initials}</div><div><div style="font-weight:600;">${name}</div><div style="font-size:0.625rem;color:var(--gray-400);">#MBR-${String(m.id).padStart(4,'0')}</div></div></div></td><td style="font-size:0.75rem;color:var(--gray-500);">${m.email}</td><td>${m.paidMay?'<span class="badge-paid">✓ مدفوع</span>':'<span class="badge-pending">⏳ لم يدفع</span>'}</td><td style="font-weight:700;color:var(--info);">${m.total} د.أ</td><td><div style="display:flex;align-items:center;gap:0.375rem;"><div class="progress-bar-wrap" style="width:4.375rem;"><div class="progress-bar-fill" style="width:${pct}%;background:${barC};"></div></div><span style="font-size:0.6875rem;font-weight:700;color:${barC};">${pct}%</span></div></td><td><div style="display:flex;gap:0.3125rem;flex-wrap:wrap;"><button class="btn-outline-custom btn-sm-custom" onclick="openDetail(${m.id})">👁</button><button class="btn-outline-custom btn-sm-custom" onclick="editMember(${m.id})">✏️</button><button class="btn-danger-custom btn-sm-custom" onclick="confirmDelete(${m.id},'${name}')">🗑️</button></div></td></tr>`;}).join('');document.getElementById('listCount').textContent=list.length+' عضو';}
+
+function applyFilters(){const q=document.getElementById('searchInput').value.trim().toLowerCase(),status=document.getElementById('filterStatus').value,commit=document.getElementById('filterCommit').value;filteredList=MEMBERS.filter(m=>{const name=(m.fname+' '+m.lname).toLowerCase();if(q&&!name.includes(q)&&!m.email.toLowerCase().includes(q))return false;if(status==='paid'&&!m.paidMay)return false;if(status==='unpaid'&&m.paidMay)return false;const pct=Math.round((m.months/16)*100);if(commit==='high'&&pct<100)return false;if(commit==='mid'&&(pct<80||pct>=100))return false;if(commit==='low'&&pct>=80)return false;return true;});document.getElementById('filterResult').textContent=`عرض ${filteredList.length} من ${MEMBERS.length}`;renderGrid(filteredList);renderTable(filteredList);updateStats(filteredList);}
+function clearFilters(){document.getElementById('searchInput').value='';document.getElementById('filterStatus').value='all';document.getElementById('filterCommit').value='all';applyFilters();}
+function updateStats(list){const paid=list.filter(m=>m.paidMay).length;document.getElementById('statTotal').textContent=list.length;document.getElementById('statPaid').textContent=paid;document.getElementById('statUnpaid').textContent=list.length-paid;document.getElementById('statTotal2').textContent=list.reduce((s,m)=>s+m.total,0);document.getElementById('statPct').textContent=list.length?Math.round((paid/list.length)*100)+'%':'0%';}
+function setView(v){currentView=v;document.getElementById('gridView').style.display=v==='grid'?'block':'none';document.getElementById('tableView').style.display=v==='list'?'block':'none';document.getElementById('btnGrid').classList.toggle('active',v==='grid');document.getElementById('btnList').classList.toggle('active',v==='list');}
+
+function openDetail(id){const m=MEMBERS.find(x=>x.id===id);if(!m)return;const name=m.fname+' '+m.lname,initials=m.fname[0]+m.lname[0],pct=Math.round((m.months/16)*100),barC=pct===100?'var(--success)':pct>=80?'var(--warning)':'var(--danger)';document.getElementById('detailAvatar').textContent=initials;document.getElementById('detailAvatar').style.background=m.color;document.getElementById('detailAvatar').style.color=m.tc;document.getElementById('detailName').textContent=name;document.getElementById('detailEmail').textContent=m.email;const monthNames=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];let monthsHTML='';for(let i=0;i<16;i++){let cls='mm-future';if(i<m.months)cls='mm-paid';else if(i===m.months&&m.paidMay)cls='mm-current';monthsHTML+=`<div class="mm-cell ${cls}">${monthNames[i%12]}</div>`;}document.getElementById('detailBody').innerHTML=`<div class="detail-section"><h3>📋 معلومات العضو</h3><div class="info-grid"><div class="info-item"><div class="lbl">رقم العضو</div><div class="val">#MBR-${String(m.id).padStart(4,'0')}</div></div><div class="info-item"><div class="lbl">الدور</div><div class="val">${m.role==='Admin'?'مدير':'عضو'}</div></div><div class="info-item"><div class="lbl">الهاتف</div><div class="val">${m.phone||'—'}</div></div><div class="info-item"><div class="lbl">الانضمام</div><div class="val">${m.joinDate||'—'}</div></div></div></div><div class="detail-section"><h3>💰 الملخص المالي</h3><div class="info-grid"><div class="info-item"><div class="lbl">إجمالي المدفوع</div><div class="val" style="color:var(--info);">${m.total} د.أ</div></div><div class="info-item"><div class="lbl">الأشهر</div><div class="val" style="color:var(--success);">${m.months}</div></div><div class="info-item"><div class="lbl">حالة مايو</div><div class="val">${m.paidMay?'<span class="badge-paid">✓ مدفوع</span>':'<span class="badge-pending">⏳ لم يدفع</span>'}</div></div><div class="info-item"><div class="lbl">الالتزام</div><div class="val" style="color:${barC};">${pct}%</div></div></div><div style="margin-top:0.75rem;"><div class="progress-bar-wrap" style="height:0.5625rem;"><div class="progress-bar-fill" style="width:${pct}%;background:${barC};"></div></div></div></div><div class="detail-section"><h3>📅 سجل المدفوعات</h3><div class="months-mini">${monthsHTML}</div></div><div style="display:flex;gap:0.5rem;flex-wrap:wrap;padding-top:0.25rem;"><button class="btn-primary-custom" style="flex:1;justify-content:center;" onclick="openPaymentFor(${m.id})">💳 تسجيل دفعة</button><button class="btn-outline-custom" style="flex:1;justify-content:center;" onclick="editMember(${m.id})">✏️ تعديل</button></div>`;document.getElementById('detailOverlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('open');document.body.style.overflow='';}
+function closeDetailOutside(e){if(e.target.id==='detailOverlay')closeDetail();}
+function openPaymentFor(id){const m=MEMBERS.find(x=>x.id===id);if(!m)return;closeDetail();document.getElementById('pm_member').value=m.fname+' '+m.lname;showModal('paymentModal');}
+
+function saveMember(){const fname=document.getElementById('mb_fname').value.trim(),lname=document.getElementById('mb_lname').value.trim(),email=document.getElementById('mb_email').value.trim(),editId=document.getElementById('editMemberId').value;if(!fname||!lname){Toast.warning('أدخل الاسم');return;}if(!email){Toast.warning('أدخل البريد');return;}if(editId){const m=MEMBERS.find(x=>x.id===parseInt(editId));if(m){m.fname=fname;m.lname=lname;m.email=email;}Toast.success(`✅ تم تحديث ${fname} ${lname}`);}else{const colors=[['#E6F1FB','#185FA5'],['#E1F5EE','#0F6E56'],['#FAEEDA','#854F0B']];const c=colors[MEMBERS.length%colors.length];MEMBERS.push({id:MEMBERS.length+1,fname,lname,email,phone:document.getElementById('mb_phone').value,joinDate:'2026-05',role:document.getElementById('mb_role').value,paidMay:false,total:0,months:0,color:c[0],tc:c[1]});Toast.success(`✅ تمت إضافة ${fname} ${lname}`);}hideModal('addMemberModal');applyFilters();}
+function editMember(id){const m=MEMBERS.find(x=>x.id===id);if(!m)return;closeDetail();document.getElementById('memberModalTitle').textContent='✏️ تعديل بيانات';document.getElementById('editMemberId').value=m.id;document.getElementById('mb_fname').value=m.fname;document.getElementById('mb_lname').value=m.lname;document.getElementById('mb_email').value=m.email;document.getElementById('mb_phone').value=m.phone||'';document.getElementById('mb_role').value=m.role;document.getElementById('saveMemberBtn').textContent='✓ حفظ';showModal('addMemberModal');}
+function confirmDelete(id,name){closeDetail();deleteTargetId=id;document.getElementById('deleteConfirmText').textContent=`هل تريد حذف "${name}"؟`;document.getElementById('confirmDeleteBtn').onclick=()=>{MEMBERS=MEMBERS.filter(m=>m.id!==id);hideModal('deleteModal');Toast.error(`تم حذف ${name}`);applyFilters();};showModal('deleteModal');}
+function savePayment(){const member=document.getElementById('pm_member').value,amount=document.getElementById('pm_amount').value;if(!member){Toast.warning('اختر العضو');return;}if(!amount||amount<=0){Toast.warning('أدخل المبلغ');return;}const m=MEMBERS.find(x=>(x.fname+' '+x.lname)===member);if(m){m.paidMay=true;m.total+=parseFloat(amount);m.months+=1;}hideModal('paymentModal');Toast.success(`✅ تم تسجيل ${amount} د.أ لـ ${member}`);applyFilters();}
+function sendAllReminders(){const p=MEMBERS.filter(m=>!m.paidMay);if(!p.length){Toast.info('جميع الأعضاء دفعوا 🎉');return;}Toast.success(`📨 تم إرسال تذكير لـ ${p.length} أعضاء`);}
+function exportMembers(){Toast.info('📥 جاري تحضير الملف...');}
+
+function populatePaymentSelect(){const s=document.getElementById('pm_member');s.innerHTML='<option value="">— اختر —</option>'+MEMBERS.map(m=>`<option>${m.fname} ${m.lname}</option>`).join('');}
+function showModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
+function hideModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';if(id==='addMemberModal'){document.getElementById('memberModalTitle').textContent='👤 إضافة عضو';document.getElementById('editMemberId').value='';document.getElementById('saveMemberBtn').textContent='✓ إضافة';['mb_fname','mb_lname','mb_email','mb_phone'].forEach(f=>document.getElementById(f).value='');}}
+function closeModalOutside(e,id){if(e.target.id===id)hideModal(id);}
+
+document.addEventListener('DOMContentLoaded',()=>{applyFilters();populatePaymentSelect();});
+</script>
+</body>
+</html>

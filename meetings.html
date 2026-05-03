@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الاجتماعات · صندوق التكافل العائلي</title>
+  <link rel="stylesheet" href="assets/shared.css">
+  <style>
+    .upcoming-banner{background:linear-gradient(135deg,var(--primary) 0%,#1e5f8e 60%,#2176ae 100%);border-radius:var(--radius-lg);padding:1.75rem 2rem;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem;margin-bottom:1.5rem;box-shadow:var(--shadow-md);position:relative;overflow:hidden;}
+    .upcoming-banner::before{content:'';position:absolute;top:-60px;left:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.05);}
+    .ub-date{text-align:center;}
+    .ub-date .day{font-size:48px;font-weight:700;line-height:1;}
+    .ub-date .month{font-size:16px;opacity:.8;}
+    .ub-info{flex:1;min-width:0;}
+    .ub-info h2{font-size:20px;font-weight:700;margin:0 0 6px;}
+    .ub-info p{font-size:14px;opacity:.8;margin:0 0 4px;}
+    .ub-host{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border-radius:var(--radius-md);padding:8px 14px;margin-top:8px;}
+    .ub-host .h-avatar{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+    .ub-actions{display:flex;gap:10px;flex-wrap:wrap;}
+    .ub-btn{padding:10px 20px;border-radius:var(--radius-md);font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;border:none;display:flex;align-items:center;gap:6px;justify-content:center;min-height:var(--touch-min);}
+    .ub-btn-green{background:#4ade80;color:#14532d;}
+    .ub-btn-green:hover{background:#22c55e;}
+    .ub-btn-white{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);}
+    .ub-btn-white:hover{background:rgba(255,255,255,.25);}
+
+    .meeting-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow-sm);transition:box-shadow .15s;display:flex;gap:16px;align-items:flex-start;}
+    .meeting-card:hover{box-shadow:var(--shadow-md);}
+    .mc-date{width:56px;height:56px;border-radius:var(--radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+    .mc-date .d{font-size:22px;font-weight:700;line-height:1;}
+    .mc-date .m{font-size:11px;font-weight:500;opacity:.8;}
+    .mc-date-future{background:var(--primary-light);color:var(--primary);}
+    .mc-date-past{background:var(--gray-100);color:var(--gray-500);}
+    .mc-content{flex:1;min-width:0;}
+    .mc-title{font-size:15px;font-weight:700;color:var(--gray-800);margin-bottom:4px;}
+    .mc-meta{font-size:12px;color:var(--gray-500);display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;}
+    .mc-meta span{display:flex;align-items:center;gap:4px;}
+    .mc-status{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600;}
+    .mc-status-upcoming{background:var(--primary-light);color:var(--primary);border:1px solid var(--primary);}
+    .mc-status-done{background:var(--success-light);color:var(--success-dark);border:1px solid var(--success-border);}
+    .mc-status-cancelled{background:var(--danger-light);color:var(--danger-dark);border:1px solid var(--danger-border);}
+    .mc-host{display:flex;align-items:center;gap:8px;margin-top:8px;}
+    .mc-host .h-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+    .mc-host .h-name{font-size:13px;font-weight:500;color:var(--gray-600);}
+    .mc-host .h-label{font-size:11px;color:var(--gray-400);}
+    .mc-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;}
+
+    .host-rotation{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:18px;margin-bottom:1.5rem;box-shadow:var(--shadow-sm);}
+    .host-rotation h3{font-size:14px;font-weight:700;color:var(--gray-700);margin:0 0 12px;}
+    .host-list{display:flex;flex-direction:column;gap:6px;}
+    .host-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;}
+    .host-item-next{background:var(--primary-light);border:1px solid var(--primary);}
+    .host-item-past{background:var(--gray-50);border:1px solid var(--gray-200);}
+    .host-item-future{border:1px solid var(--gray-100);}
+    .host-item .h-order{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+    .host-item-next .h-order{background:var(--primary);color:#fff;}
+    .host-item-past .h-order{background:var(--gray-300);color:var(--gray-600);}
+    .host-item-future .h-order{background:var(--gray-100);color:var(--gray-400);}
+
+    .attendance-mini{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;}
+    .att-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;}
+    .att-more{width:26px;height:26px;border-radius:50%;background:var(--gray-100);color:var(--gray-500);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;}
+
+    @media(max-width:640px){
+      .upcoming-banner{padding:1.25rem;}
+      .ub-date .day{font-size:36px;}
+      .ub-info h2{font-size:16px;}
+    }
+  </style>
+</head>
+<body>
+
+<nav class="app-navbar">
+  <button class="nav-toggle" onclick="MobileNav.toggleSidebar()" aria-label="القائمة">☰</button>
+  <a href="admin-dashboard.html" class="navbar-brand">
+    <div class="brand-icon">🤝</div>
+    <span>صندوق التكافل</span>
+    <span class="role-badge role-admin">أدمن</span>
+  </a>
+  <div class="nav-links">
+    <a href="admin-dashboard.html" class="nav-link">🏠 الرئيسية</a>
+    <a href="members.html"         class="nav-link">👥 الأعضاء</a>
+    <a href="transactions.html"    class="nav-link">💰 المعاملات</a>
+    <a href="withdrawals.html"     class="nav-link">🚨 السحوبات</a>
+    <a href="meetings.html"        class="nav-link active">📅 الاجتماعات</a>
+  </div>
+  <div class="navbar-right">
+    <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+    <div class="user-avatar">عم</div>
+  </div>
+</nav>
+
+<div class="sidebar-overlay"></div>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="brand">🤝 صندوق التكافل</span>
+      <button class="sidebar-close" onclick="MobileNav.closeSidebar()">✕</button>
+    </div>
+    <div class="sidebar-section-title">القائمة الرئيسية</div>
+    <a href="admin-dashboard.html" class="sidebar-link"><span class="s-icon">🏠</span> الرئيسية</a>
+    <a href="members.html"         class="sidebar-link"><span class="s-icon">👥</span> إدارة الأعضاء</a>
+    <a href="transactions.html"    class="sidebar-link"><span class="s-icon">💰</span> المعاملات</a>
+    <a href="withdrawals.html"     class="sidebar-link"><span class="s-icon">🚨</span> طلبات السحب</a>
+    <a href="meetings.html"        class="sidebar-link active"><span class="s-icon">📅</span> الاجتماعات</a>
+    <div class="sidebar-section-title">الإدارة</div>
+    <a href="#" class="sidebar-link" onclick="showModal('newMeetingModal');return false;"><span class="s-icon">➕</span> إضافة اجتماع</a>
+    <a href="#" class="sidebar-link" onclick="sendMeetingReminders()"><span class="s-icon">🔔</span> تذكير بالاجتماع</a>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="u-avatar">عم</div>
+        <div><div class="u-name">عبدالله المدير</div><div class="u-role">مدير النظام</div></div>
+      </div>
+      <button class="btn-logout" onclick="Auth.logout()">🚪 تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>📅 الاجتماعات</h1>
+        <p>جدول الاجتماعات الشهرية وتناوب الاستضافة</p>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-outline-custom" onclick="exportMeetings()">📥 تصدير</button>
+        <button class="btn-primary-custom" onclick="showModal('newMeetingModal')">➕ إضافة اجتماع</button>
+      </div>
+    </div>
+
+    <div class="upcoming-banner">
+      <div class="ub-date">
+        <div class="day">5</div>
+        <div class="month">مايو</div>
+      </div>
+      <div class="ub-info">
+        <h2>اجتماع مايو 2026</h2>
+        <p>الثلاثاء 5 مايو · الساعة 8:00 مساءً</p>
+        <p>الموضوع: مراجعة مالية الربع الثاني</p>
+        <div class="ub-host">
+          <div class="h-avatar">عخ</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;">المضيف: عمر خالد</div>
+            <div style="font-size:11px;opacity:.7;">الاستضافة رقم 2</div>
+          </div>
+        </div>
+      </div>
+      <div class="ub-actions">
+        <button class="ub-btn ub-btn-green" onclick="sendMeetingReminders()">🔔 إرسال تذكير</button>
+        <button class="ub-btn ub-btn-white" onclick="showModal('newMeetingModal')">➕ اجتماع جديد</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-icon">📅</span>
+        <div class="stat-label">إجمالي الاجتماعات</div>
+        <div class="stat-value" style="color:var(--gray-800);" id="statTotal">16</div>
+        <div class="stat-sub">منذ البداية</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">✅</span>
+        <div class="stat-label">متوسط الحضور</div>
+        <div class="stat-value" style="color:var(--success);" id="statAttendance">92%</div>
+        <div class="stat-sub">نسبة الحضور</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🔄</span>
+        <div class="stat-label">دورة الاستضافة</div>
+        <div class="stat-value" style="color:var(--info);" id="statCycle">12</div>
+        <div class="stat-sub">عضو في الدورة</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">⏭️</span>
+        <div class="stat-label">الاستضافة القادمة</div>
+        <div class="stat-value" style="color:var(--warning);" id="statNextHost">عمر</div>
+        <div class="stat-sub">مايو 2026</div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <select id="filterStatus" onchange="applyFilters()">
+        <option value="all">كل الاجتماعات</option>
+        <option value="upcoming">القادمة</option>
+        <option value="completed">المنعقدة</option>
+        <option value="cancelled">الملغاة</option>
+      </select>
+      <span class="filter-clear" onclick="clearFilters()">✕ مسح</span>
+      <span class="filter-result" id="filterResult">عرض 5 اجتماعات</span>
+    </div>
+
+    <div id="meetingsList"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <span class="es-icon">📅</span>
+      <p>لا توجد اجتماعات تطابق الفلتر</p>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="newMeetingModal" onclick="closeModalOutside(event,'newMeetingModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>➕ إضافة اجتماع جديد</h3>
+      <button class="modal-close" onclick="hideModal('newMeetingModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">عنوان الاجتماع <span class="req">*</span></label>
+        <input type="text" id="mt_title" class="form-control-custom" placeholder="مثال: اجتماع مايو 2026">
+      </div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label">التاريخ <span class="req">*</span></label>
+          <input type="date" id="mt_date" class="form-control-custom">
+        </div>
+        <div class="form-group">
+          <label class="form-label">الوقت <span class="req">*</span></label>
+          <input type="time" id="mt_time" class="form-control-custom" value="20:00">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">المضيف <span class="req">*</span></label>
+        <select id="mt_host" class="form-control-custom">
+          <option value="">— اختر المضيف —</option>
+          <option>أحمد محمد</option><option>عمر خالد</option><option>سعيد علي</option>
+          <option>محمد رشيد</option><option>خالد حسن</option><option>فيصل سالم</option>
+          <option>عصام الكيلاني</option><option>راشد الزيود</option><option>ياسر المجالي</option>
+          <option>نادر العبابسة</option><option>بلال الشرمان</option><option>وسيم الحوامدة</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">المكان</label>
+        <input type="text" id="mt_location" class="form-control-custom" placeholder="اختياري...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">جدول الأعمال</label>
+        <textarea id="mt_agenda" class="form-control-custom" rows="3" placeholder="نقاط النقاش..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="hideModal('newMeetingModal')">إلغاء</button>
+      <button class="btn-primary-custom" onclick="saveMeeting()">✓ حفظ الاجتماع</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="detailModal" onclick="closeModalOutside(event,'detailModal')">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-header" id="detailModalHeader"></div>
+    <div class="modal-body" id="detailModalBody"></div>
+    <div class="modal-footer" id="detailModalFooter"></div>
+  </div>
+</div>
+
+<script src="assets/shared.js"></script>
+<script>
+const HOST_ROTATION = [
+  { order:1,  name:'أحمد محمد',    initials:'أم', color:'#E6F1FB', tc:'#185FA5', month:'يناير 2026',  status:'done',    attendance:11 },
+  { order:2,  name:'عمر خالد',     initials:'عخ', color:'#E1F5EE', tc:'#0F6E56', month:'فبراير 2026',  status:'done',    attendance:10 },
+  { order:3,  name:'سعيد علي',     initials:'سع', color:'#FAEEDA', tc:'#854F0B', month:'مارس 2026',    status:'done',    attendance:12 },
+  { order:4,  name:'محمد رشيد',    initials:'مر', color:'#EEEDFE', tc:'#534AB7', month:'أبريل 2026',   status:'done',    attendance:9  },
+  { order:5,  name:'خالد حسن',     initials:'خح', color:'#FCEBEB', tc:'#A32D2D', month:'مايو 2026',    status:'upcoming', attendance:null },
+  { order:6,  name:'فيصل سالم',    initials:'فس', color:'#E1F5EE', tc:'#085041', month:'يونيو 2026',   status:'future',  attendance:null },
+  { order:7,  name:'عصام الكيلاني',initials:'عك', color:'#FFF3CD', tc:'#856404', month:'يوليو 2026',   status:'future',  attendance:null },
+  { order:8,  name:'راشد الزيود',  initials:'رز', color:'#D1ECF1', tc:'#0C5460', month:'أغسطس 2026',   status:'future',  attendance:null },
+];
+
+const MEETINGS = [
+  { id:1, title:'اجتماع مايو 2026', date:'2026-05-05', dateLabel:'5 مايو 2026', time:'8:00 م', host:'خالد حسن', hostInitials:'خح', hostColor:'#FCEBEB', hostTc:'#A32D2D', location:'منزل الأخ خالد', status:'upcoming', agenda:'مراجعة مالية - طلبات سحب - استضافة الشهر القادم', attendance:12, attendees:null },
+  { id:2, title:'اجتماع أبريل 2026', date:'2026-04-08', dateLabel:'8 أبريل 2026', time:'8:00 م', host:'محمد رشيد', hostInitials:'مر', hostColor:'#EEEDFE', hostTc:'#534AB7', location:'منزل الأخ محمد', status:'completed', agenda:'اعتماد ميزانية Q2 - مراجعة السحوبات', attendance:9, attendees:['أم','عخ','سع','مر','فس','عك','رز','بش','وح'] },
+  { id:3, title:'اجتماع مارس 2026', date:'2026-03-05', dateLabel:'5 مارس 2026', time:'8:00 م', host:'سعيد علي', hostInitials:'سع', hostColor:'#FAEEDA', hostTc:'#854F0B', location:'منزل الأخ سعيد', status:'completed', agenda:'تقرير شهري - مناقشة زيادة الاشتراك', attendance:12, attendees:['أم','عخ','سع','مر','خح','فس','عك','رز','يم','نع','بش','وح'] },
+  { id:4, title:'اجتماع فبراير 2026', date:'2026-02-06', dateLabel:'6 فبراير 2026', time:'8:00 م', host:'عمر خالد', hostInitials:'عخ', hostColor:'#E1F5EE', hostTc:'#0F6E56', location:'منزل الأخ عمر', status:'completed', agenda:'مساعدة وفاة - مراجعة النظام', attendance:10, attendees:['أم','عخ','سع','مر','خح','فس','عك','نع','بش','وح'] },
+  { id:5, title:'اجتماع يناير 2026', date:'2026-01-07', dateLabel:'7 يناير 2026', time:'8:00 م', host:'أحمد محمد', hostInitials:'أم', hostColor:'#E6F1FB', hostTc:'#185FA5', location:'منزل الأخ أحمد', status:'completed', agenda:'افتتاح السنة - خطة العمل', attendance:11, attendees:['أم','عخ','سع','مر','خح','عك','رز','يم','نع','بش','وح'] },
+];
+
+let filtered = [...MEETINGS];
+
+function statusBadge(status) {
+  const map = { upcoming:'mc-status-upcoming', completed:'mc-status-done', cancelled:'mc-status-cancelled' };
+  const labels = { upcoming:'📅 قادمة', completed:'✅ انعقدت', cancelled:'❌ ملغاة' };
+  return `<span class="mc-status ${map[status]}">${labels[status]}</span>`;
+}
+
+function renderMeetings(list) {
+  const container = document.getElementById('meetingsList');
+  if(!list.length){ container.innerHTML=''; document.getElementById('emptyState').style.display='block'; return; }
+  document.getElementById('emptyState').style.display='none';
+  container.innerHTML = list.map(m => {
+    const dateObj = new Date(m.date);
+    const day = dateObj.getDate();
+    const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const month = months[dateObj.getMonth()];
+    const dateCls = m.status==='upcoming' ? 'mc-date-future' : 'mc-date-past';
+    const attHTML = m.attendees ? `
+      <div class="attendance-mini">
+        ${m.attendees.slice(0,5).map(a=>`<div class="att-avatar" style="background:var(--gray-200);color:var(--gray-600);">${a}</div>`).join('')}
+        ${m.attendees.length>5?`<div class="att-more">+${m.attendees.length-5}</div>`:''}
+        <span style="font-size:11px;color:var(--gray-400);margin-right:4px;">حضر ${m.attendance}</span>
+      </div>` : '';
+    return `
+    <div class="meeting-card" onclick="viewDetail(${m.id})" style="cursor:pointer;">
+      <div class="mc-date ${dateCls}">
+        <div class="d">${day}</div>
+        <div class="m">${month}</div>
+      </div>
+      <div class="mc-content">
+        <div class="mc-title">${m.title}</div>
+        <div class="mc-meta">
+          <span>🕐 ${m.time}</span>
+          ${m.location?`<span>📍 ${m.location}</span>`:''}
+          <span>👥 ${m.attendance} / 12</span>
+        </div>
+        ${statusBadge(m.status)}
+        ${attHTML}
+        <div class="mc-host">
+          <div class="h-avatar" style="background:${m.hostColor};color:${m.hostTc};">${m.hostInitials}</div>
+          <div><div class="h-name">${m.host}</div><div class="h-label">المضيف</div></div>
+        </div>
+      </div>
+      <div class="mc-actions">
+        ${m.status==='upcoming'?`<button class="btn-success-custom btn-sm-custom" onclick="event.stopPropagation();markComplete(${m.id})">✅ عقد</button>`:''}
+        <button class="btn-outline-custom btn-sm-custom" onclick="event.stopPropagation();viewDetail(${m.id})">📋</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('filterResult').textContent = `عرض ${list.length} اجتماعات`;
+}
+
+function applyFilters() {
+  const status = document.getElementById('filterStatus').value;
+  filtered = MEETINGS.filter(m => {
+    if(status!=='all' && m.status!==status) return false;
+    return true;
+  });
+  renderMeetings(filtered);
+}
+
+function clearFilters() {
+  document.getElementById('filterStatus').value='all';
+  applyFilters();
+}
+
+function viewDetail(id) {
+  const m = MEETINGS.find(x=>x.id===id);
+  if(!m) return;
+  document.getElementById('detailModalHeader').innerHTML = `
+    <h3>📋 ${m.title}</h3>
+    <button class="modal-close" onclick="hideModal('detailModal')">✕</button>`;
+  document.getElementById('detailModalBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div style="background:var(--gray-50);border-radius:var(--radius-md);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);font-weight:600;">التاريخ</div><div style="font-size:14px;font-weight:600;">${m.dateLabel}</div></div>
+      <div style="background:var(--gray-50);border-radius:var(--radius-md);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);font-weight:600;">الوقت</div><div style="font-size:14px;font-weight:600;">${m.time}</div></div>
+      <div style="background:var(--gray-50);border-radius:var(--radius-md);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);font-weight:600;">المضيف</div><div style="font-size:14px;font-weight:600;">${m.host}</div></div>
+      <div style="background:var(--gray-50);border-radius:var(--radius-md);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);font-weight:600;">الحضور</div><div style="font-size:14px;font-weight:600;">${m.attendance} / 12</div></div>
+    </div>
+    ${m.location?`<div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:4px;">المكان:</div><div style="font-size:14px;">${m.location}</div></div>`:''}
+    ${m.agenda?`<div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:4px;">جدول الأعمال:</div><div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:12px;font-size:14px;color:var(--gray-600);line-height:1.6;">${m.agenda}</div></div>`:''}
+    ${m.attendees?`<div><div style="font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:8px;">الحاضرون (${m.attendance}):</div>
+      <div class="attendance-mini">${m.attendees.map(a=>`<div class="att-avatar" style="background:var(--success-light);color:var(--success-dark);border:1px solid var(--success-border);">${a}</div>`).join('')}</div>
+    </div>`:''}`;
+  document.getElementById('detailModalFooter').innerHTML = `
+    ${m.status==='upcoming'?`<button class="btn-success-custom" onclick="markComplete(${m.id});hideModal('detailModal');">✅ تأكيد الانعقاد</button>`:''}
+    <button class="btn-outline-custom" onclick="hideModal('detailModal')">إغلاق</button>`;
+  showModal('detailModal');
+}
+
+function markComplete(id) {
+  UI.confirm('هل تريد تأكيد انعقاد هذا الاجتماع؟', () => {
+    const m = MEETINGS.find(x=>x.id===id);
+    if(m) m.status='completed';
+    applyFilters();
+    Toast.success('✅ تم تسجيل انعقاد الاجتماع');
+  });
+}
+
+function saveMeeting() {
+  const title = document.getElementById('mt_title').value.trim();
+  const date = document.getElementById('mt_date').value;
+  if(!title){ Toast.warning('أدخل عنوان الاجتماع'); return; }
+  if(!date){ Toast.warning('أدخل التاريخ'); return; }
+  hideModal('newMeetingModal');
+  Toast.success('✅ تم إضافة الاجتماع بنجاح');
+}
+
+function sendMeetingReminders() { Toast.success('📨 تم إرسال تذكير لجميع الأعضاء بالاجتماع القادم'); }
+function exportMeetings(){ Toast.info('📥 جاري تحضير التقرير...'); }
+function showModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function hideModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+function closeModalOutside(e,id){ if(e.target.id===id) hideModal(id); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('mt_date').value = '2026-05-05';
+  applyFilters();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة الأدمن · صندوق التكافل العائلي</title>
+  <link rel="stylesheet" href="assets/shared.css">
+  <style>
+    /* ══ Page-specific responsive overrides ══ */
+    .balance-hero { display: flex; flex-direction: column; text-align: center; }
+    .bh-main { text-align: center; }
+    .bh-stat { text-align: center; margin: 0.75rem 0; }
+    .bh-stat .lbl { font-size: 0.75rem; opacity: .75; margin-bottom: 0.25rem; }
+    .bh-stat .val { font-size: 1.125rem; font-weight: 700; }
+    .bh-divider { display: none; }
+    .bh-actions { flex-direction: row; justify-content: center; gap: 0.5rem; width: 100%; }
+    .btn-bh { padding: 0.625rem 1.25rem; border-radius: var(--radius-md); font-size: 0.8125rem; font-weight: 600; font-family: var(--font); cursor: pointer; border: none; display: flex; align-items: center; gap: 0.375rem; justify-content: center; min-height: var(--touch-min); }
+    .btn-bh-green { background: #4ade80; color: #14532d; }
+    .btn-bh-green:hover { background: #22c55e; }
+    .btn-bh-white { background: rgba(255,255,255,.18); color: #fff; border: 0.0625rem solid rgba(255,255,255,.3); }
+    .btn-bh-white:hover { background: rgba(255,255,255,.28); }
+    .grid-2-3 { display: grid; grid-template-columns: 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+    .grid-1-1 { display: grid; grid-template-columns: 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+    .welcome-strip { background: #fff; border: 0.0625rem solid var(--gray-200); border-radius: var(--radius-lg); padding: 1rem; display: flex; align-items: flex-start; justify-content: space-between; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; box-shadow: var(--shadow-sm); }
+    .welcome-strip h2 { font-size: 1rem; font-weight: 700; margin: 0 0 0.1875rem; color: var(--gray-800); }
+    .welcome-strip p { font-size: 0.75rem; color: var(--gray-500); margin: 0; }
+    .ws-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .member-name-cell { display: flex; align-items: center; gap: 0.5625rem; }
+    .progress-bar-wrap { width: 100%; height: 0.4375rem; background: var(--gray-200); border-radius: 0.25rem; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 0.25rem; }
+    .wd-card { border: 0.0625rem solid var(--gray-200); border-radius: var(--radius-md); padding: 0.875rem; margin-bottom: 0.75rem; background: var(--gray-50); }
+    .wd-card:last-child { margin-bottom: 0; }
+    .wd-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.375rem; gap: 0.5rem; flex-wrap: wrap; }
+    .wd-title { font-size: 0.875rem; font-weight: 700; color: var(--gray-800); }
+    .wd-amount { font-size: 1.25rem; font-weight: 700; color: var(--danger); }
+    .wd-meta { font-size: 0.6875rem; color: var(--gray-500); margin-bottom: 0.5625rem; }
+    .wd-reason { font-size: 0.8125rem; color: var(--gray-600); background: #fff; border: 0.0625rem solid var(--gray-200); border-radius: var(--radius-sm); padding: 0.5rem 0.6875rem; margin-bottom: 0.6875rem; line-height: 1.5; }
+    .wd-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 0.0625rem solid var(--gray-100); }
+    .summary-row { display: flex; align-items: center; justify-content: space-between; padding: 0.625rem 0; border-bottom: 0.0625rem solid var(--gray-100); font-size: 0.8125rem; }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-lbl { color: var(--gray-500); font-weight: 500; }
+    .summary-val { font-weight: 700; color: var(--gray-800); }
+    .collection-row { display: flex; align-items: center; gap: 0.625rem; padding: 0.5rem 0; border-bottom: 0.0625rem solid var(--gray-100); font-size: 0.8125rem; }
+    .collection-row:last-child { border-bottom: none; }
+    .col-month { width: 4rem; color: var(--gray-600); font-weight: 500; flex-shrink: 0; font-size: 0.75rem; }
+    .col-bar { flex: 1; }
+    .col-pct { width: 2.5rem; text-align: left; font-weight: 700; font-size: 0.6875rem; }
+    .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; margin-bottom: 1.25rem; }
+    .qa-btn { background: #fff; border: 0.0625rem solid var(--gray-200); border-radius: var(--radius-md); padding: 0.875rem; text-align: center; cursor: pointer; transition: all .15s; font-family: var(--font); box-shadow: var(--shadow-sm); min-height: var(--touch-min); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .qa-btn:hover { border-color: var(--primary); box-shadow: var(--shadow-md); transform: translateY(-0.0625rem); }
+    .qa-btn .qa-icon { font-size: 1.25rem; display: block; margin-bottom: 0.375rem; }
+    .qa-btn .qa-label { font-size: 0.8125rem; font-weight: 600; color: var(--gray-700); display: block; }
+    .qa-btn .qa-sub { font-size: 0.625rem; color: var(--gray-400); margin-top: 0.125rem; display: block; }
+    .notif-count { background: var(--accent); color: #fff; font-size: 0.625rem; font-weight: 700; padding: 0.0625rem 0.375rem; border-radius: 0.5rem; margin-right: auto; }
+
+    @media (min-width: 48rem) {
+      .balance-hero { flex-direction: row; text-align: right; justify-content: space-between; }
+      .bh-stat { text-align: center; margin: 0; }
+      .bh-divider { display: block; width: 0.0625rem; height: 3.125rem; background: rgba(255,255,255,.2); }
+      .bh-actions { flex-direction: column; justify-content: flex-start; width: auto; }
+      .btn-bh { padding: 0.625rem 1.25rem; }
+      .grid-2-3 { grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+      .grid-1-1 { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+      .welcome-strip { flex-direction: row; align-items: center; padding: 1rem 1.25rem; }
+      .welcome-strip h2 { font-size: 1.125rem; }
+      .wd-card { padding: 0.9375rem 1rem; }
+    }
+    @media (min-width: 64rem) {
+      .balance-hero { padding: 1.75rem 2rem; }
+      .bh-main .amt { font-size: 2.75rem; }
+      .quick-actions { grid-template-columns: repeat(4, 1fr); }
+      .qa-btn { padding: 1.125rem; }
+      .qa-btn .qa-icon { font-size: 1.5rem; }
+      .qa-btn .qa-label { font-size: 0.875rem; }
+      .ws-actions { flex-wrap: nowrap; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="app-navbar">
+  <button class="nav-toggle" onclick="MobileNav.toggleSidebar()" aria-label="القائمة">☰</button>
+  <a href="admin-dashboard.html" class="navbar-brand">
+    <div class="brand-icon">🤝</div>
+    <span>صندوق التكافل</span>
+    <span class="role-badge role-admin">أدمن</span>
+  </a>
+  <div class="nav-links">
+    <a href="admin-dashboard.html" class="nav-link active">🏠 الرئيسية</a>
+    <a href="members.html"         class="nav-link">👥 الأعضاء</a>
+    <a href="transactions.html"    class="nav-link">💰 المعاملات</a>
+    <a href="withdrawals.html"     class="nav-link">🚨 السحوبات</a>
+    <a href="meetings.html"        class="nav-link">📅 الاجتماعات</a>
+  </div>
+  <div class="navbar-right">
+    <button class="notif-btn" onclick="showModal('notifModal')" aria-label="الإشعارات">
+      🔔<span class="notif-dot"></span>
+    </button>
+    <div class="user-avatar" data-user-initials title="الأدمن"></div>
+  </div>
+</nav>
+
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <span class="brand">🤝 صندوق التكافل</span>
+    <button class="sidebar-close" onclick="MobileNav.closeSidebar()">✕</button>
+  </div>
+  <div class="sidebar-section-title">القائمة الرئيسية</div>
+  <a href="admin-dashboard.html" class="sidebar-link active"><span class="s-icon">🏠</span> الرئيسية</a>
+  <a href="members.html"         class="sidebar-link"><span class="s-icon">👥</span> إدارة الأعضاء</a>
+  <a href="transactions.html"    class="sidebar-link"><span class="s-icon">💰</span> المعاملات</a>
+  <a href="withdrawals.html"     class="sidebar-link"><span class="s-icon">🚨</span> طلبات السحب<span class="sidebar-badge">1</span></a>
+  <a href="meetings.html"        class="sidebar-link"><span class="s-icon">📅</span> الاجتماعات</a>
+  <div class="sidebar-section-title">الإدارة</div>
+  <a href="#" class="sidebar-link" onclick="showModal('paymentModal');return false;"><span class="s-icon">➕</span> تسجيل دفعة</a>
+  <a href="#" class="sidebar-link" onclick="showModal('withdrawalModal');return false;"><span class="s-icon">📤</span> طلب سحب جديد</a>
+  <a href="#" class="sidebar-link" onclick="showModal('memberModal');return false;"><span class="s-icon">👤</span> إضافة عضو</a>
+  <a href="#" class="sidebar-link"><span class="s-icon">📊</span> التقارير</a>
+  <div class="sidebar-section-title">النظام</div>
+  <a href="profile.html"  class="sidebar-link"><span class="s-icon">⚙️</span> الإعدادات</a>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="u-avatar">عم</div>
+      <div><div class="u-name" data-user-name>عبدالله المدير</div><div class="u-role">مدير النظام</div></div>
+    </div>
+    <button class="btn-logout" onclick="Auth.logout()">🚪 تسجيل الخروج</button>
+  </div>
+</aside>
+
+<main class="main-content">
+  <div class="welcome-strip">
+    <div>
+      <h2>أهلاً، عبدالله 👋</h2>
+      <p id="todayDate">الأحد، 4 مايو 2026</p>
+    </div>
+    <div class="ws-actions">
+      <button class="btn-primary-custom" onclick="showModal('paymentModal')">➕ تسجيل دفعة</button>
+      <button class="btn-outline-custom" onclick="showModal('withdrawalModal')">📤 طلب سحب</button>
+      <button class="btn-outline-custom" onclick="exportReport()">📄 تصدير</button>
+    </div>
+  </div>
+
+  <div class="balance-hero">
+    <div class="bh-main">
+      <div class="lbl">💰 رصيد الصندوق الإجمالي</div>
+      <div><span class="amt" id="totalBalance">2,847</span> <span class="cur">د.أ</span></div>
+      <div class="bh-live"><span class="live-dot"></span> محسوب من المعاملات</div>
+    </div>
+    <div style="display:flex;gap:1.25rem;flex-wrap:wrap;justify-content:center;">
+      <div class="bh-stat"><div class="lbl">إجمالي الإيداعات</div><div class="val">3,480 د.أ</div></div>
+      <div class="bh-divider"></div>
+      <div class="bh-stat"><div class="lbl">إجمالي السحوبات</div><div class="val">633 د.أ</div></div>
+      <div class="bh-divider"></div>
+      <div class="bh-stat"><div class="lbl">هذا الشهر</div><div class="val">27 د.أ</div></div>
+    </div>
+    <div class="bh-actions">
+      <button class="btn-bh btn-bh-green" onclick="showModal('paymentModal')">➕ تسجيل دفعة</button>
+      <button class="btn-bh btn-bh-white" onclick="showModal('withdrawalModal')">📤 طلب سحب</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-label">إجمالي الأعضاء</div><div class="stat-value" style="color:var(--gray-800);">12</div><div class="stat-sub">عضو نشط</div></div>
+    <div class="stat-card"><span class="stat-icon">✅</span><div class="stat-label">دفعوا مايو</div><div class="stat-value" style="color:var(--success);">9</div><div class="stat-sub">من 12 عضو</div></div>
+    <div class="stat-card"><span class="stat-icon">⏳</span><div class="stat-label">لم يدفعوا</div><div class="stat-value" style="color:var(--warning);">3</div><div class="stat-sub">يستحق التذكير</div></div>
+    <div class="stat-card"><span class="stat-icon">🚨</span><div class="stat-label">سحوبات معلقة</div><div class="stat-value" style="color:var(--danger);">1</div><div class="stat-sub">تحتاج موافقة</div></div>
+    <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-label">أيام للاجتماع</div><div class="stat-value" style="color:var(--info);">1</div><div class="stat-sub">الثلاثاء 5 مايو</div></div>
+  </div>
+
+  <div class="quick-actions">
+    <button class="qa-btn" onclick="showModal('paymentModal')"><span class="qa-icon">💳</span><span class="qa-label">تسجيل دفعة</span><span class="qa-sub">تسجيل اشتراك</span></button>
+    <button class="qa-btn" onclick="showModal('withdrawalModal')"><span class="qa-icon">📤</span><span class="qa-label">طلب سحب</span><span class="qa-sub">مساعدة طارئة</span></button>
+    <button class="qa-btn" onclick="showModal('memberModal')"><span class="qa-icon">👤</span><span class="qa-label">إضافة عضو</span><span class="qa-sub">تسجيل جديد</span></button>
+    <button class="qa-btn" onclick="sendReminders()"><span class="qa-icon">🔔</span><span class="qa-label">تذكيرات</span><span class="qa-sub">للمتأخرين (3)</span></button>
+  </div>
+
+  <div class="grid-2-3">
+    <div class="panel">
+      <div class="panel-header">
+        <h2><span class="ph-icon">👥</span> حالة مدفوعات مايو</h2>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <input type="text" placeholder="🔍 بحث" id="memberSearch" class="form-control-custom" style="max-width:9rem;min-height:2rem;padding:0.25rem 0.625rem;font-size:0.75rem;" oninput="filterMembers(this.value)">
+          <a href="members.html" style="font-size:0.8125rem;color:var(--info);text-decoration:none;font-weight:500;white-space:nowrap;">كل الأعضاء ←</a>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="membersTable">
+          <thead><tr><th>العضو</th><th>الشهر</th><th>الإجمالي</th><th>الالتزام</th><th>إجراء</th></tr></thead>
+          <tbody id="membersTbody"></tbody>
+        </table>
+      </div>
+      <div class="panel-footer">
+        <span id="membersCount">12 عضو</span>
+        <button class="btn-outline-custom btn-sm-custom" onclick="sendReminders()">📨 تذكير المتأخرين</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel" style="margin-bottom:1.25rem;">
+        <div class="panel-header">
+          <h2><span class="ph-icon">🚨</span> السحوبات المعلقة</h2>
+          <a href="withdrawals.html" style="font-size:0.8125rem;color:var(--info);text-decoration:none;font-weight:500;">كل الطلبات ←</a>
+        </div>
+        <div class="panel-body" style="padding:0.875rem;">
+          <div class="wd-card" id="wdCard1">
+            <div class="wd-top">
+              <div>
+                <div class="wd-title">مساعدة طارئة · مرض</div>
+                <div class="wd-meta">طالب: محمد رشيد · 22 أبريل 2026</div>
+              </div>
+              <div class="wd-amount">200 د.أ</div>
+            </div>
+            <div class="wd-reason">تغطية نفقات علاج والدة الأخ محمد رشيد في مستشفى الأردن الجامعي</div>
+            <div style="font-size:0.6875rem;color:var(--gray-500);font-weight:600;margin-bottom:0.3125rem;">الموافقات (1 من 2):</div>
+            <div class="appr-track">
+              <div class="appr-dot appr-done" title="عبدالله المدير">✓</div>
+              <div class="appr-line"></div>
+              <div class="appr-dot appr-pending" title="في الانتظار">2</div>
+            </div>
+            <div class="wd-actions">
+              <button class="btn-success-custom btn-sm-custom" onclick="approveWithdrawal('wdCard1')">✓ موافقة</button>
+              <button class="btn-danger-custom  btn-sm-custom" onclick="rejectWithdrawal('wdCard1')">✗ رفض</button>
+              <button class="btn-outline-custom btn-sm-custom">📋 تفاصيل</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2><span class="ph-icon">📊</span> ملخص الصندوق</h2></div>
+        <div class="panel-body">
+          <div class="summary-row"><span class="summary-lbl">نسبة التحصيل (مايو)</span><span class="summary-val" style="color:var(--warning);">75%</span></div>
+          <div style="padding:0.25rem 0 0.625rem;"><div class="progress-bar-wrap" style="height:0.5625rem;"><div class="progress-bar-fill" style="width:75%;background:var(--warning);"></div></div></div>
+          <div class="summary-row"><span class="summary-lbl">مدفوعات متأخرة</span><span class="summary-val" style="color:var(--danger);">9 د.أ (3 أعضاء)</span></div>
+          <div class="summary-row"><span class="summary-lbl">الاجتماع القادم</span><span class="summary-val">الثلاثاء 5 مايو</span></div>
+          <div class="summary-row"><span class="summary-lbl">المضيف القادم</span><span class="summary-val">عمر خالد</span></div>
+          <div class="summary-row"><span class="summary-lbl">عمر الصندوق</span><span class="summary-val">16 شهراً</span></div>
+          <div style="margin-top:0.875rem;font-size:0.8125rem;font-weight:700;color:var(--gray-700);margin-bottom:0.625rem;">📈 نسب التحصيل</div>
+          <div id="collectionChart"></div>
+          <button class="btn-primary-custom w-100 justify-center mt-2" onclick="exportReport()">📄 تصدير التقرير</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2><span class="ph-icon">💰</span> آخر المعاملات</h2>
+      <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+        <select id="txFilter" onchange="filterTransactions()" class="form-control-custom" style="max-width:7rem;min-height:2rem;padding:0.25rem 0.625rem;font-size:0.75rem;background:#fff;cursor:pointer;">
+          <option value="all">الكل</option><option value="deposit">إيداع</option><option value="withdrawal">سحب</option>
+        </select>
+        <a href="transactions.html" style="font-size:0.8125rem;color:var(--info);text-decoration:none;font-weight:500;white-space:nowrap;">عرض الكل ←</a>
+      </div>
+    </div>
+    <div class="panel-body" id="txList"></div>
+  </div>
+</main>
+
+<!-- MODAL: Record Payment -->
+<div class="modal-overlay" id="paymentModal" onclick="closeModalOutside(event,'paymentModal')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>💳 تسجيل دفعة</h3><button class="modal-close" onclick="hideModal('paymentModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">العضو <span class="req">*</span></label><select id="pm_member" class="form-control-custom"><option value="">— اختر —</option><option>أحمد محمد</option><option>عمر خالد</option><option>سعيد علي</option><option>محمد رشيد</option><option>خالد حسن</option><option>فيصل سالم</option></select></div>
+      <div class="form-group"><label class="form-label">الشهر <span class="req">*</span></label><select id="pm_month" class="form-control-custom"><option value="2026-05">مايو 2026</option><option value="2026-04">أبريل 2026</option></select></div>
+      <div class="form-group"><label class="form-label">المبلغ (د.أ) <span class="req">*</span></label><input type="number" id="pm_amount" class="form-control-custom" value="3" min="1" step="0.5"><div class="form-text">الاشتراك الشهري = 3 د.أ</div></div>
+      <div class="form-group"><label class="form-label">ملاحظة</label><input type="text" id="pm_note" class="form-control-custom" placeholder="اختياري..."></div>
+      <div class="alert-info">ℹ️ سيتم تسجيل المعاملة فوراً</div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline-custom" onclick="hideModal('paymentModal')">إلغاء</button><button class="btn-primary-custom" onclick="savePayment()">✓ حفظ</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Withdrawal -->
+<div class="modal-overlay" id="withdrawalModal" onclick="closeModalOutside(event,'withdrawalModal')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>📤 طلب سحب طارئ</h3><button class="modal-close" onclick="hideModal('withdrawalModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">نوع السحب <span class="req">*</span></label><select id="wd_type" class="form-control-custom"><option value="">— اختر —</option><option value="death">مساعدة وفاة</option><option value="emergency">حالة طارئة</option><option value="medical">مساعدة طبية</option><option value="other">أخرى</option></select></div>
+      <div class="form-group"><label class="form-label">المستفيد <span class="req">*</span></label><input type="text" id="wd_beneficiary" class="form-control-custom" placeholder="مثال: عائلة الأخ أحمد"></div>
+      <div class="form-group"><label class="form-label">المبلغ (د.أ) <span class="req">*</span></label><input type="number" id="wd_amount" class="form-control-custom" placeholder="0.00" min="1"><div class="form-text">الرصيد المتاح: 2,847 د.أ</div></div>
+      <div class="form-group"><label class="form-label">الوصف <span class="req">*</span></label><textarea id="wd_desc" class="form-control-custom" rows="3" placeholder="اشرح سبب الطلب..."></textarea></div>
+      <div class="alert-warning">⚠️ سيتم إشعار جميع الأعضاء</div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline-custom" onclick="hideModal('withdrawalModal')">إلغاء</button><button class="btn-danger-custom" onclick="saveWithdrawal()">📤 إرسال</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Add Member -->
+<div class="modal-overlay" id="memberModal" onclick="closeModalOutside(event,'memberModal')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>👤 إضافة عضو</h3><button class="modal-close" onclick="hideModal('memberModal')">✕</button></div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+        <div class="form-group"><label class="form-label">الاسم الأول <span class="req">*</span></label><input type="text" id="mb_fname" class="form-control-custom" placeholder="أحمد"></div>
+        <div class="form-group"><label class="form-label">العائلة <span class="req">*</span></label><input type="text" id="mb_lname" class="form-control-custom" placeholder="محمد"></div>
+      </div>
+      <div class="form-group"><label class="form-label">البريد <span class="req">*</span></label><input type="email" id="mb_email" class="form-control-custom" placeholder="example@email.com"></div>
+      <div class="form-group"><label class="form-label">الهاتف</label><input type="tel" id="mb_phone" class="form-control-custom" placeholder="07X-XXXX-XXX"></div>
+      <div class="form-group"><label class="form-label">الدور</label><select id="mb_role" class="form-control-custom"><option value="Member">عضو</option><option value="Admin">مدير</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline-custom" onclick="hideModal('memberModal')">إلغاء</button><button class="btn-primary-custom" onclick="saveMember()">✓ إضافة</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Notifications -->
+<div class="modal-overlay" id="notifModal" onclick="closeModalOutside(event,'notifModal')">
+  <div class="modal-box" style="max-width:23.75rem;">
+    <div class="modal-header"><h3>🔔 الإشعارات</h3><button class="modal-close" onclick="hideModal('notifModal')">✕</button></div>
+    <div id="notifList" style="max-height:25rem;overflow-y:auto;"></div>
+    <div class="modal-footer"><button class="btn-outline-custom btn-sm-custom" onclick="markAllRead()">تحديد الكل كمقروء</button></div>
+  </div>
+</div>
+
+<script src="assets/shared.js"></script>
+<script>
+const MEMBERS = [
+  { id:1,  name:'أحمد محمد',    initials:'أم', color:'#E6F1FB', tc:'#185FA5', paidMay:true,  total:48, months:16 },
+  { id:2,  name:'عمر خالد',     initials:'عخ', color:'#E1F5EE', tc:'#0F6E56', paidMay:true,  total:48, months:16 },
+  { id:3,  name:'سعيد علي',     initials:'سع', color:'#FAEEDA', tc:'#854F0B', paidMay:false, total:45, months:15 },
+  { id:4,  name:'محمد رشيد',    initials:'مر', color:'#EEEDFE', tc:'#534AB7', paidMay:true,  total:48, months:16 },
+  { id:5,  name:'خالد حسن',     initials:'خح', color:'#FCEBEB', tc:'#A32D2D', paidMay:false, total:42, months:14 },
+  { id:6,  name:'فيصل سالم',    initials:'فس', color:'#E1F5EE', tc:'#085041', paidMay:true,  total:48, months:16 },
+  { id:7,  name:'عصام الكيلاني',initials:'عك', color:'#FFF3CD', tc:'#856404', paidMay:true,  total:48, months:16 },
+  { id:8,  name:'راشد الزيود',  initials:'رز', color:'#D1ECF1', tc:'#0C5460', paidMay:true,  total:48, months:16 },
+  { id:9,  name:'ياسر المجالي', initials:'يم', color:'#E2E3E5', tc:'#383D41', paidMay:false, total:39, months:13 },
+  { id:10, name:'نادر العبابسة',initials:'نع', color:'#E6F1FB', tc:'#185FA5', paidMay:true,  total:48, months:16 },
+  { id:11, name:'بلال الشرمان', initials:'بش', color:'#FAEEDA', tc:'#854F0B', paidMay:true,  total:48, months:16 },
+  { id:12, name:'وسيم الحوامدة',initials:'وح', color:'#E1F5EE', tc:'#0F6E56', paidMay:true,  total:48, months:16 },
+];
+const TRANSACTIONS = [
+  { type:'deposit',    name:'أحمد محمد',    desc:'اشتراك مايو 2026',          amount:3,   date:'1 مايو 2026'  },
+  { type:'deposit',    name:'عمر خالد',     desc:'اشتراك مايو 2026',          amount:3,   date:'1 مايو 2026'  },
+  { type:'deposit',    name:'محمد رشيد',    desc:'اشتراك مايو 2026',          amount:3,   date:'1 مايو 2026'  },
+  { type:'withdrawal', name:'الأدمن',       desc:'مساعدة طارئة - عائلة الحسن',amount:150, date:'15 أبريل 2026'},
+  { type:'deposit',    name:'فيصل سالم',    desc:'اشتراك أبريل 2026',         amount:3,   date:'1 أبريل 2026' },
+  { type:'deposit',    name:'عصام الكيلاني',desc:'اشتراك أبريل 2026',         amount:3,   date:'1 أبريل 2026' },
+  { type:'withdrawal', name:'الأدمن',       desc:'مساعدة وفاة - والد أبو سالم',amount:483,date:'10 فبراير 2026'},
+  { type:'deposit',    name:'راشد الزيود',  desc:'اشتراك مارس 2026',          amount:3,   date:'2 مارس 2026'  },
+];
+const NOTIFICATIONS = [
+  { icon:'🚨', text:'طلب سحب جديد من محمد رشيد بقيمة 200 د.أ', time:'منذ 2 ساعة', unread:true  },
+  { icon:'⏰', text:'سعيد علي لم يدفع اشتراك مايو',    time:'منذ 3 أيام', unread:true  },
+  { icon:'⏰', text:'خالد حسن لم يدفع اشتراك مايو',    time:'منذ 3 أيام', unread:true  },
+  { icon:'📅', text:'اجتماع مايو غداً الثلاثاء',time:'منذ يوم', unread:false },
+  { icon:'✅', text:'تمت الموافقة على السحب السابق',time:'منذ أسبوع',unread:false },
+];
+const MONTHLY_COLLECTION = [
+  { month:'يناير', pct:100 }, { month:'فبراير',pct:92  }, { month:'مارس',  pct:100 },
+  { month:'أبريل', pct:83  }, { month:'مايو',  pct:75  },
+];
+
+function renderMembers(list) {
+  const tbody = document.getElementById('membersTbody');
+  tbody.innerHTML = list.map(m => {
+    const pct = Math.round((m.months / 16) * 100);
+    const barColor = pct === 100 ? 'var(--success)' : pct >= 80 ? 'var(--warning)' : 'var(--danger)';
+    return `<tr>
+      <td><div class="member-name-cell"><div class="member-avatar" style="background:${m.color};color:${m.tc};">${m.initials}</div><span style="font-weight:500;">${m.name}</span></div></td>
+      <td>${m.paidMay ? '<span class="badge-paid">✓ مدفوع</span>' : '<span class="badge-pending">! لم يدفع</span>'}</td>
+      <td style="font-weight:600;">${m.total} د.أ</td>
+      <td><div style="display:flex;align-items:center;gap:0.4375rem;"><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%;background:${barColor};"></div></div><span style="font-size:0.6875rem;font-weight:600;color:${barColor};">${pct}%</span></div></td>
+      <td>${m.paidMay ? `<button class="btn-outline-custom btn-sm-custom" onclick="viewMember(${m.id})">تفاصيل</button>` : `<button class="btn-success-custom btn-sm-custom" onclick="recordPaymentFor('${m.name}')">تسجيل</button>`}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('membersCount').textContent = list.length + ' عضو';
+}
+function filterMembers(q) { const f = MEMBERS.filter(m => m.name.includes(q)); renderMembers(f); }
+function viewMember(id) { window.location.href = `members.html?id=${id}`; }
+function recordPaymentFor(name) { document.getElementById('pm_member').value = name; showModal('paymentModal'); }
+
+function renderTransactions(list) {
+  const icons = { deposit:'💳', withdrawal:'📤' };
+  const bgCls = { deposit:'tx-deposit-icon', withdrawal:'tx-withdraw-icon' };
+  document.getElementById('txList').innerHTML = list.map(tx => `
+    <div class="tx-row">
+      <div class="tx-icon-wrap ${bgCls[tx.type]}">${icons[tx.type]}</div>
+      <div class="tx-info"><div class="tx-title">${tx.desc}</div><div class="tx-date">${tx.date} · ${tx.name}</div></div>
+      <div class="tx-amount ${tx.type==='deposit'?'tx-plus':'tx-minus'}">${tx.type==='deposit'?'+':'-'}${tx.amount.toFixed(2)} د.أ</div>
+    </div>`).join('');
+}
+function filterTransactions() { const f = document.getElementById('txFilter').value; renderTransactions(f === 'all' ? TRANSACTIONS : TRANSACTIONS.filter(t => t.type === f)); }
+
+function renderCollectionChart() {
+  document.getElementById('collectionChart').innerHTML = MONTHLY_COLLECTION.map(m => {
+    const c = m.pct === 100 ? 'var(--success)' : m.pct >= 80 ? 'var(--warning)' : 'var(--danger)';
+    return `<div class="collection-row"><span class="col-month">${m.month}</span><div class="col-bar"><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${m.pct}%;background:${c};"></div></div></div><span class="col-pct" style="color:${c};">${m.pct}%</span></div>`;
+  }).join('');
+}
+
+function renderNotifications() {
+  document.getElementById('notifList').innerHTML = NOTIFICATIONS.map((n, i) => `
+    <div style="display:flex;gap:0.625rem;padding:0.8125rem 1.125rem;border-bottom:0.0625rem solid var(--gray-100);background:${n.unread?'var(--primary-light)':'#fff'};" id="notif_${i}">
+      <span style="font-size:1.25rem;flex-shrink:0;">${n.icon}</span>
+      <div style="flex:1;"><div style="font-size:0.8125rem;font-weight:${n.unread?'600':'400'};color:var(--gray-800);">${n.text}</div><div style="font-size:0.6875rem;color:var(--gray-400);margin-top:0.1875rem;">${n.time}</div></div>
+      ${n.unread?`<div style="width:0.5rem;height:0.5rem;background:var(--primary);border-radius:50%;margin-top:0.3125rem;flex-shrink:0;"></div>`:''}
+    </div>`).join('');
+}
+function markAllRead() { NOTIFICATIONS.forEach((n,i) => { n.unread = false; const el = document.getElementById('notif_'+i); if (el) el.style.background='#fff'; }); document.querySelector('.notif-dot').style.display = 'none'; Toast.success('تم تحديد جميع الإشعارات كمقروءة'); }
+
+function showModal(id) { if (id === 'notifModal') renderNotifications(); document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+function hideModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+function closeModalOutside(e, id) { if (e.target.id === id) hideModal(id); }
+
+function savePayment() { const m = document.getElementById('pm_member').value; const a = document.getElementById('pm_amount').value; if(!m){Toast.warning('اختر العضو');return;} if(!a||a<=0){Toast.warning('أدخل المبلغ');return;} hideModal('paymentModal'); Toast.success(`✅ تم تسجيل دفعة ${a} د.أ للعضو ${m}`); const mem = MEMBERS.find(x=>x.name===m); if(mem){mem.paidMay=true;renderMembers(MEMBERS);} }
+function saveWithdrawal() { const t=document.getElementById('wd_type').value,a=document.getElementById('wd_amount').value,d=document.getElementById('wd_desc').value; if(!t){Toast.warning('اختر النوع');return;} if(!a){Toast.warning('أدخل المبلغ');return;} if(!d){Toast.warning('أدخل وصفاً');return;} if(parseFloat(a)>2847){Toast.error('المبلغ يتجاوز الرصيد');return;} hideModal('withdrawalModal'); Toast.success('✅ تم إرسال طلب السحب'); }
+function saveMember() { const f=document.getElementById('mb_fname').value.trim(),l=document.getElementById('mb_lname').value.trim(),e=document.getElementById('mb_email').value.trim(); if(!f||!l){Toast.warning('أدخل الاسم');return;} if(!e){Toast.warning('أدخل البريد');return;} hideModal('memberModal'); Toast.success(`✅ تمت إضافة العضو ${f} ${l}`); }
+function approveWithdrawal(cardId) { UI.confirm('هل تؤكد الموافقة؟',()=>{ const c=document.getElementById(cardId); c.style.borderColor='var(--success-border)'; c.style.background='var(--success-light)'; c.querySelector('.wd-actions').innerHTML='<span style="font-size:0.8125rem;color:var(--success-dark);font-weight:700;">✅ تمت الموافقة</span>'; document.querySelector('.sidebar-badge').textContent='0'; Toast.success('تمت الموافقة'); }); }
+function rejectWithdrawal(cardId) { UI.confirm('هل تؤكد الرفض؟',()=>{ const c=document.getElementById(cardId); c.style.borderColor='var(--danger-border)'; c.style.background='var(--danger-light)'; c.querySelector('.wd-actions').innerHTML='<span style="font-size:0.8125rem;color:var(--danger-dark);font-weight:700;">❌ تم الرفض</span>'; document.querySelector('.sidebar-badge').textContent='0'; Toast.error('تم الرفض'); }); }
+function sendReminders() { const p=MEMBERS.filter(m=>!m.paidMay); if(!p.length){Toast.info('جميع الأعضاء دفعوا 🎉');return;} Toast.success(`📨 تم إرسال تذكير لـ ${p.length} أعضاء`); }
+function exportReport() { Toast.info('📄 جاري تحضير التقرير...'); }
+
+function setDate() {
+  const d=new Date(); const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت']; const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  document.getElementById('todayDate').textContent=`${days[d.getDay()]}، ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+document.addEventListener('DOMContentLoaded',()=>{ setDate(); renderMembers(MEMBERS); renderTransactions(TRANSACTIONS); renderCollectionChart(); });
+</script>
+</body>
+</html>

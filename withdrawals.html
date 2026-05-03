@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>طلبات السحب · صندوق التكافل العائلي</title>
+  <link rel="stylesheet" href="assets/shared.css">
+  <style>
+    .wd-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-sm);transition:box-shadow .15s;}
+    .wd-card:hover{box-shadow:var(--shadow-md);}
+    .wd-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;}
+    .wd-type-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;}
+    .wd-type-emergency{background:var(--warning-light);color:var(--warning-dark);border:1px solid var(--warning-border);}
+    .wd-type-death{background:var(--danger-light);color:var(--danger-dark);border:1px solid var(--danger-border);}
+    .wd-type-medical{background:var(--info-light);color:var(--info-dark);border:1px solid var(--info-border);}
+    .wd-type-other{background:var(--gray-100);color:var(--gray-600);border:1px solid var(--gray-200);}
+    .wd-amount{font-size:24px;font-weight:700;color:var(--danger);}
+    .wd-title{font-size:16px;font-weight:700;color:var(--gray-800);margin-bottom:4px;}
+    .wd-meta{font-size:12px;color:var(--gray-500);}
+    .wd-reason{font-size:14px;color:var(--gray-600);background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:12px 14px;margin:12px 0;line-height:1.6;}
+    .wd-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--gray-100);}
+    .status-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:14px;font-size:13px;font-weight:600;}
+    .status-pending{background:var(--warning-light);color:var(--warning-dark);border:1px solid var(--warning-border);}
+    .status-approved{background:var(--success-light);color:var(--success-dark);border:1px solid var(--success-border);}
+    .status-rejected{background:var(--danger-light);color:var(--danger-dark);border:1px solid var(--danger-border);}
+    .wd-ref{font-size:11px;color:var(--gray-400);font-family:monospace;}
+  </style>
+</head>
+<body>
+
+<nav class="app-navbar">
+  <button class="nav-toggle" onclick="MobileNav.toggleSidebar()" aria-label="القائمة">☰</button>
+  <a href="admin-dashboard.html" class="navbar-brand">
+    <div class="brand-icon">🤝</div>
+    <span>صندوق التكافل</span>
+    <span class="role-badge role-admin">أدمن</span>
+  </a>
+  <div class="nav-links">
+    <a href="admin-dashboard.html" class="nav-link">🏠 الرئيسية</a>
+    <a href="members.html"         class="nav-link">👥 الأعضاء</a>
+    <a href="transactions.html"    class="nav-link">💰 المعاملات</a>
+    <a href="withdrawals.html"     class="nav-link active">🚨 السحوبات</a>
+    <a href="meetings.html"        class="nav-link">📅 الاجتماعات</a>
+  </div>
+  <div class="navbar-right">
+    <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+    <div class="user-avatar">عم</div>
+  </div>
+</nav>
+
+<div class="sidebar-overlay"></div>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="brand">🤝 صندوق التكافل</span>
+      <button class="sidebar-close" onclick="MobileNav.closeSidebar()">✕</button>
+    </div>
+    <div class="sidebar-section-title">القائمة الرئيسية</div>
+    <a href="admin-dashboard.html" class="sidebar-link"><span class="s-icon">🏠</span> الرئيسية</a>
+    <a href="members.html"         class="sidebar-link"><span class="s-icon">👥</span> إدارة الأعضاء</a>
+    <a href="transactions.html"    class="sidebar-link"><span class="s-icon">💰</span> المعاملات</a>
+    <a href="withdrawals.html"     class="sidebar-link active"><span class="s-icon">🚨</span> طلبات السحب<span class="sidebar-badge">1</span></a>
+    <a href="meetings.html"        class="sidebar-link"><span class="s-icon">📅</span> الاجتماعات</a>
+    <div class="sidebar-section-title">الإدارة</div>
+    <a href="#" class="sidebar-link" onclick="showModal('newWithdrawalModal');return false;"><span class="s-icon">📤</span> طلب سحب جديد</a>
+    <a href="#" class="sidebar-link"><span class="s-icon">📊</span> التقارير</a>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="u-avatar">عم</div>
+        <div><div class="u-name">عبدالله المدير</div><div class="u-role">مدير النظام</div></div>
+      </div>
+      <button class="btn-logout" onclick="Auth.logout()">🚪 تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>🚨 طلبات السحب</h1>
+        <p>إدارة ومتابعة طلبات السحب الطارئ</p>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-outline-custom" onclick="exportWithdrawals()">📥 تصدير التقرير</button>
+        <button class="btn-primary-custom" onclick="showModal('newWithdrawalModal')">📤 طلب سحب جديد</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-icon">⏳</span>
+        <div class="stat-label">طلبات معلقة</div>
+        <div class="stat-value" style="color:var(--warning);" id="statPending">1</div>
+        <div class="stat-sub">تحتاج مراجعة</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">✅</span>
+        <div class="stat-label">تمت الموافقة</div>
+        <div class="stat-value" style="color:var(--success);" id="statApproved">2</div>
+        <div class="stat-sub">هذا العام</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">❌</span>
+        <div class="stat-label">مرفوضة</div>
+        <div class="stat-value" style="color:var(--danger);" id="statRejected">0</div>
+        <div class="stat-sub">هذا العام</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">💰</span>
+        <div class="stat-label">إجمالي المسحوب</div>
+        <div class="stat-value" style="color:var(--info);" id="statTotal">633</div>
+        <div class="stat-sub">دينار أردني</div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <select id="filterStatus" onchange="applyFilters()">
+        <option value="all">كل الحالات</option>
+        <option value="pending">معلقة</option>
+        <option value="approved">موافق عليها</option>
+        <option value="rejected">مرفوضة</option>
+      </select>
+      <select id="filterType" onchange="applyFilters()">
+        <option value="all">كل الأنواع</option>
+        <option value="emergency">حالة طارئة</option>
+        <option value="death">مساعدة وفاة</option>
+        <option value="medical">مساعدة طبية</option>
+        <option value="other">أخرى</option>
+      </select>
+      <span class="filter-clear" onclick="clearFilters()">✕ مسح الفلاتر</span>
+      <span class="filter-result" id="filterResult">عرض 3 طلبات</span>
+    </div>
+
+    <div id="withdrawalsList"></div>
+
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <span class="es-icon">📋</span>
+      <p>لا توجد طلبات سحب تطابق الفلتر</p>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="newWithdrawalModal" onclick="closeModalOutside(event,'newWithdrawalModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📤 طلب سحب طارئ</h3>
+      <button class="modal-close" onclick="hideModal('newWithdrawalModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">نوع السحب <span class="req">*</span></label>
+        <select id="wd_type" class="form-control-custom">
+          <option value="">— اختر النوع —</option>
+          <option value="death">مساعدة وفاة</option>
+          <option value="emergency">حالة طارئة</option>
+          <option value="medical">مساعدة طبية</option>
+          <option value="other">أخرى</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">المستفيد / سبب الطلب <span class="req">*</span></label>
+        <input type="text" id="wd_beneficiary" class="form-control-custom" placeholder="مثال: عائلة الأخ أحمد - وفاة والدة">
+      </div>
+      <div class="form-group">
+        <label class="form-label">المبلغ المطلوب (د.أ) <span class="req">*</span></label>
+        <input type="number" id="wd_amount" class="form-control-custom" placeholder="0.00" min="1">
+        <div class="form-text">الرصيد المتاح: 2,847 د.أ</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الوصف التفصيلي <span class="req">*</span></label>
+        <textarea id="wd_desc" class="form-control-custom" rows="3" placeholder="اشرح سبب الطلب بالتفصيل..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">يتطلب موافقة</label>
+        <select id="wd_approvals" class="form-control-custom">
+          <option value="1">موافقة واحدة (أدمن)</option>
+          <option value="2" selected>موافقتان (أدمنان)</option>
+          <option value="3">3 موافقات</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="hideModal('newWithdrawalModal')">إلغاء</button>
+      <button class="btn-danger-custom" onclick="saveWithdrawal()">📤 إرسال الطلب</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="detailModal" onclick="closeModalOutside(event,'detailModal')">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-header" id="detailModalHeader"></div>
+    <div class="modal-body" id="detailModalBody"></div>
+    <div class="modal-footer" id="detailModalFooter"></div>
+  </div>
+</div>
+
+<script src="assets/shared.js"></script>
+<script>
+const WITHDRAWALS = [
+  { id:1, ref:'WTH-0001', type:'emergency', typeLabel:'حالة طارئة', title:'مساعدة طارئة · مرض', applicant:'محمد رشيد', applicantInitials:'مر', applicantColor:'#EEEDFE', applicantTc:'#534AB7', beneficiary:'عائلة محمد رشيد', amount:200, date:'22 أبريل 2026', dateShort:'2026-04-22', reason:'تغطية نفقات علاج والدة الأخ محمد رشيد في مستشفى الأردن الجامعي', status:'pending', approvalsRequired:2, approvalsGiven:1, approvers:['عبدالله المدير','في الانتظار'] },
+  { id:2, ref:'WTH-0002', type:'emergency', typeLabel:'حالة طارئة', title:'مساعدة طارئة · عائلة الحسن', applicant:'الأدمن', applicantInitials:'عم', applicantColor:'#D1ECF1', applicantTc:'#0C5460', beneficiary:'عائلة الحسن', amount:150, date:'15 أبريل 2026', dateShort:'2026-04-15', reason:'مساعدة عاجلة لعائلة الحسن بعد حريق في المنزل', status:'approved', approvalsRequired:2, approvalsGiven:2, approvers:['عبدالله المدير','راشد الزيود'] },
+  { id:3, ref:'WTH-0003', type:'death', typeLabel:'مساعدة وفاة', title:'مساعدة وفاة · والد أبو سالم', applicant:'الأدمن', applicantInitials:'عم', applicantColor:'#D1ECF1', applicantTc:'#0C5460', beneficiary:'أبو سالم', amount:483, date:'10 فبراير 2026', dateShort:'2026-02-10', reason:'مساعدة وفاة لوالد الأخ أبو سالم حسب لائحة الصندوق', status:'approved', approvalsRequired:2, approvalsGiven:2, approvers:['عبدالله المدير','راشد الزيود'] },
+];
+
+let filtered = [...WITHDRAWALS];
+
+function typeBadge(type) {
+  const map = { emergency:'wd-type-emergency', death:'wd-type-death', medical:'wd-type-medical', other:'wd-type-other' };
+  const labels = { emergency:'حالة طارئة', death:'مساعدة وفاة', medical:'مساعدة طبية', other:'أخرى' };
+  return `<span class="wd-type-badge ${map[type]}">${labels[type]}</span>`;
+}
+
+function statusPill(status) {
+  const map = { pending:'status-pending', approved:'status-approved', rejected:'status-rejected' };
+  const labels = { pending:'⏳ معلقة', approved:'✅ موافق عليها', rejected:'❌ مرفوضة' };
+  return `<span class="status-pill ${map[status]}">${labels[status]}</span>`;
+}
+
+function approvalTrack(wd) {
+  let html = '<div class="appr-track">';
+  for(let i=0;i<wd.approvalsRequired;i++){
+    if(i>0) html+='<div class="appr-line"></div>';
+    if(i<wd.approvalsGiven){
+      html+=`<div class="appr-dot appr-done" title="${wd.approvers[i]}">✓<span class="appr-label">${wd.approvers[i]}</span></div>`;
+    } else {
+      html+=`<div class="appr-dot appr-pending"><span class="appr-label">${wd.approvers[i]}</span></div>`;
+    }
+  }
+  html+='</div>';
+  return html;
+}
+
+function renderWithdrawals(list) {
+  const container = document.getElementById('withdrawalsList');
+  if(!list.length){ container.innerHTML=''; document.getElementById('emptyState').style.display='block'; return; }
+  document.getElementById('emptyState').style.display='none';
+  container.innerHTML = list.map(wd => `
+    <div class="wd-card" id="wd_${wd.id}">
+      <div class="wd-card-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+            ${typeBadge(wd.type)}
+            <span class="wd-ref">#${wd.ref}</span>
+          </div>
+          <div class="wd-title">${wd.title}</div>
+          <div class="wd-meta">طالب: ${wd.applicant} · ${wd.date} · المستفيد: ${wd.beneficiary}</div>
+        </div>
+        <div style="text-align:left;">
+          <div class="wd-amount">${wd.amount} د.أ</div>
+          ${statusPill(wd.status)}
+        </div>
+      </div>
+      <div class="wd-reason">${wd.reason}</div>
+      <div style="font-size:11px;color:var(--gray-500);font-weight:600;">
+        الموافقات (${wd.approvalsGiven} من ${wd.approvalsRequired}):
+      </div>
+      ${approvalTrack(wd)}
+      <div class="wd-actions">
+        ${wd.status==='pending'?`
+          <button class="btn-success-custom" onclick="approveWithdrawal(${wd.id})">✓ موافقة</button>
+          <button class="btn-danger-custom" onclick="rejectWithdrawal(${wd.id})">✗ رفض</button>
+        `:''}
+        <button class="btn-outline-custom" onclick="viewDetail(${wd.id})">📋 تفاصيل</button>
+        ${wd.status==='approved'?`<button class="btn-outline-custom" onclick="processPayout(${wd.id})">💳 صرف المبلغ</button>`:''}
+      </div>
+    </div>`).join('');
+  document.getElementById('filterResult').textContent = `عرض ${list.length} طلبات`;
+}
+
+function applyFilters() {
+  const status = document.getElementById('filterStatus').value;
+  const type = document.getElementById('filterType').value;
+  filtered = WITHDRAWALS.filter(wd => {
+    if(status!=='all' && wd.status!==status) return false;
+    if(type!=='all' && wd.type!==type) return false;
+    return true;
+  });
+  renderWithdrawals(filtered);
+  updateStats();
+}
+
+function clearFilters() {
+  document.getElementById('filterStatus').value='all';
+  document.getElementById('filterType').value='all';
+  applyFilters();
+}
+
+function updateStats() {
+  const pending = WITHDRAWALS.filter(w=>w.status==='pending').length;
+  const approved = WITHDRAWALS.filter(w=>w.status==='approved').length;
+  const rejected = WITHDRAWALS.filter(w=>w.status==='rejected').length;
+  const total = WITHDRAWALS.filter(w=>w.status==='approved').reduce((s,w)=>s+w.amount,0);
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statApproved').textContent = approved;
+  document.getElementById('statRejected').textContent = rejected;
+  document.getElementById('statTotal').textContent = total;
+  document.querySelector('.sidebar-badge').textContent = pending;
+}
+
+function approveWithdrawal(id) {
+  UI.confirm('هل تؤكد الموافقة على طلب السحب؟', () => {
+    const wd = WITHDRAWALS.find(w=>w.id===id);
+    if(wd){ wd.status='approved'; wd.approvalsGiven=wd.approvalsRequired; }
+    applyFilters();
+    Toast.success('تمت الموافقة على طلب السحب');
+  });
+}
+
+function rejectWithdrawal(id) {
+  UI.confirm('هل تأكيد رفض طلب السحب؟', () => {
+    const wd = WITHDRAWALS.find(w=>w.id===id);
+    if(wd) wd.status='rejected';
+    applyFilters();
+    Toast.error('تم رفض طلب السحب');
+  });
+}
+
+function viewDetail(id) {
+  const wd = WITHDRAWALS.find(w=>w.id===id);
+  if(!wd) return;
+  document.getElementById('detailModalHeader').innerHTML = `
+    <h3>📋 تفاصيل الطلب #${wd.ref}</h3>
+    <button class="modal-close" onclick="hideModal('detailModal')">✕</button>`;
+  document.getElementById('detailModalBody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      ${typeBadge(wd.type)}
+      ${statusPill(wd.status)}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="info-item" style="background:var(--gray-50);border-radius:var(--radius-md);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);font-weight:600;">المبلغ</div><div style="font-size:18px;font-weight:700;color:var(--danger);">${wd.amount} د.أ</div></div>
+      <div class="info-item" style="background:var(--gray-50);border-radius:var(--radius-md);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);font-weight:600;">المستفيد</div><div style="font-size:14px;font-weight:600;">${wd.beneficiary}</div></div>
+      <div class="info-item" style="background:var(--gray-50);border-radius:var(--radius-md);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);font-weight:600;">الطالب</div><div style="font-size:14px;font-weight:600;">${wd.applicant}</div></div>
+      <div class="info-item" style="background:var(--gray-50);border-radius:var(--radius-md);padding:10px 12px;"><div style="font-size:11px;color:var(--gray-400);font-weight:600;">التاريخ</div><div style="font-size:14px;font-weight:600;">${wd.date}</div></div>
+    </div>
+    <div style="margin-top:16px;">
+      <div style="font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:6px;">السبب:</div>
+      <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:12px;font-size:14px;color:var(--gray-600);line-height:1.6;">${wd.reason}</div>
+    </div>
+    <div style="margin-top:16px;">
+      <div style="font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:8px;">الموافقات (${wd.approvalsGiven}/${wd.approvalsRequired}):</div>
+      ${approvalTrack(wd)}
+    </div>`;
+  document.getElementById('detailModalFooter').innerHTML = `<button class="btn-outline-custom" onclick="hideModal('detailModal')">إغلاق</button>`;
+  showModal('detailModal');
+}
+
+function processPayout(id) {
+  UI.confirm('هل تريد تسجيل صرف المبلغ كمعاملة مالية؟', () => {
+    Toast.success('✅ تم تسجيل صرف المبلغ في سجل المعاملات');
+  });
+}
+
+function saveWithdrawal() {
+  const type = document.getElementById('wd_type').value;
+  const amount = document.getElementById('wd_amount').value;
+  const desc = document.getElementById('wd_desc').value;
+  if(!type){ Toast.warning('اختر نوع السحب'); return; }
+  if(!amount){ Toast.warning('أدخل المبلغ'); return; }
+  if(!desc){ Toast.warning('أدخل وصفاً تفصيلياً'); return; }
+  if(parseFloat(amount)>2847){ Toast.error('المبلغ يتجاوز الرصيد'); return; }
+  hideModal('newWithdrawalModal');
+  Toast.success('✅ تم إرسال طلب السحب');
+}
+
+function exportWithdrawals(){ Toast.info('📥 جاري تحضير التقرير...'); }
+function showModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function hideModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+function closeModalOutside(e,id){ if(e.target.id===id) hideModal(id); }
+
+document.addEventListener('DOMContentLoaded', () => { applyFilters(); });
+</script>
+</body>
+</html>
