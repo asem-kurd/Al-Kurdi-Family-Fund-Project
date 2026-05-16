@@ -1,0 +1,6 @@
+@Al_Kurdi_Family_Fund_HostAddress = http://localhost:5252
+
+GET {{Al_Kurdi_Family_Fund_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

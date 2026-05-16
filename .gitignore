@@ -1,0 +1,8 @@
+# Ignore Visual Studio temporary and cache files
+bin/
+obj/
+.vs/
+*.user
+appsettings.Development.json
+.env
+*.suo

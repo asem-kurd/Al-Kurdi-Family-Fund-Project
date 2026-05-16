@@ -1,0 +1,5 @@
+1- fix the problms in desktop UI 
+2- profile for the membership
+3- the membership have to know how much the total balance in the bank and    how much the Deposit and withdrawal happend and all the history of them
+
+4- 

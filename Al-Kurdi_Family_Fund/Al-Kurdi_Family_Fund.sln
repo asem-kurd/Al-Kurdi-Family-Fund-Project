@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36811.4 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Al-Kurdi_Family_Fund", "Al-Kurdi_Family_Fund.csproj", "{21763A99-DBE1-4E40-8E0E-AAB5048C84CF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{21763A99-DBE1-4E40-8E0E-AAB5048C84CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21763A99-DBE1-4E40-8E0E-AAB5048C84CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21763A99-DBE1-4E40-8E0E-AAB5048C84CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21763A99-DBE1-4E40-8E0E-AAB5048C84CF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {87849F31-5A7E-4EC1-9D41-C0C901348AAC}
+	EndGlobalSection
+EndGlobal

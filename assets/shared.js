@@ -5,7 +5,7 @@
 
 /* ─── Config ─── */
 const CONFIG = {
-  API_BASE: '/api',          // ← change to your backend URL
+    API_BASE: 'http://localhost:5252/api',          // ← change to your backend URL
   TOKEN_KEY: 'fund_token',
   USER_KEY:  'fund_user',
 };
